@@ -15,14 +15,14 @@ open Shared
 // in this case, we are keeping track of a counter
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
-type Model = { Counter: Counter option; DebugMessage: string }
+type Model = { Quests : Shared.BetterQuestingDB.QuestDatabase[] option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
     | Increment
     | Decrement
-    | InitialCountLoaded of Counter
+    | InitialDataLoaded of Shared.BetterQuestingDB.QuestDatabase[]
 
 module Server =
 
@@ -39,24 +39,24 @@ let initialCounter = Server.questAPI.questList
 
 // defines the initial state and initial command (= side-effect) of the application
 let init () : Model * Cmd<Msg> =
-    let initialModel = { Counter = None; DebugMessage = "" }
+    let initialModel = { Quests = None }
     let loadCountCmd =
-        Cmd.OfAsync.perform initialCounter () InitialCountLoaded
+        Cmd.OfAsync.perform initialCounter () InitialDataLoaded
     initialModel, loadCountCmd
 
 // The update function computes the next state of the application based on the current state and the incoming events/messages
 // It can also run side-effects (encoded as commands) like calling the server via Http.
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
-    match currentModel.Counter, msg with
-    | Some counter, Increment ->
-        let nextModel = { currentModel with Counter = Some { Value = counter.Value + 1 } }
-        nextModel, Cmd.none
-    | Some counter, Decrement ->
-        let nextModel = { currentModel with Counter = Some { Value = counter.Value - 1 } }
-        nextModel, Cmd.none
-    | _, InitialCountLoaded initialCount->
-        let nextModel = { Counter = Some initialCount, }
+    match currentModel, msg with
+    // | Some counter, Increment ->
+    //     let nextModel = { currentModel with Counter = Some { Value = counter.Value + 1 } }
+    //     nextModel, Cmd.none
+    // | Some counter, Decrement ->
+    //     let nextModel = { currentModel with Counter = Some { Value = counter.Value - 1 } }
+    //     nextModel, Cmd.none
+    | _, InitialDataLoaded quests->
+        let nextModel = { Quests = Some quests }
         nextModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
@@ -87,10 +87,6 @@ let safeComponents =
           strong [ ] [ str Version.app ]
           str " powered by: "
           components ]
-
-let show = function
-    | { Counter = Some counter } -> string counter.Value
-    | { Counter = None   } -> "Loading..."
 
 let navBrand =
     Navbar.navbar [ Navbar.Color IsWhite ]
@@ -206,7 +202,7 @@ let counter (model : Model) (dispatch : Msg -> unit) =
         [ Control.p [ Control.IsExpanded ]
             [ Input.text
                 [ Input.Disabled true
-                  Input.Value (show model) ] ]
+                  Input.Value ("0") ] ]
           Control.p [ ]
             [ Button.a
                 [ Button.Color IsInfo
@@ -284,6 +280,18 @@ let columns (model : Model) (dispatch : Msg -> unit) =
                         [ Content.content   [ ]
                             [ counter model dispatch ] ] ]   ] ]
 
+let showQuest (q:Shared.BetterQuestingDB.QuestDatabase) = 
+    div [] [
+        h3 [] [q.Properties.Betterquesting.Name |> str]
+        p [] [q.Properties.Betterquesting.Desc |> str]
+    ]
+
+let show (quests:Shared.BetterQuestingDB.QuestDatabase[] option) = 
+    match quests with
+    | Some quests -> quests |> Array.map showQuest
+    | None -> Array.empty
+
+
 let view (model : Model) (dispatch : Msg -> unit) =
     div [ ]
         [ navBrand
@@ -297,7 +305,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
                         info
                         columns model dispatch ]
                     Column.column [ Column.Width (Screen.All, Column.Is9) ]
-                      [ str ]
+                      (model.Quests |> show |> Array.toList)
 
 
                   ] ] ]

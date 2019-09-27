@@ -6,6 +6,7 @@ group Server
     nuget FSharp.Core
     nuget Saturn
     nuget Fable.Remoting.Giraffe ~> 3
+    nuget Fsharp.Data
 
 group Client
     source https://api.nuget.org/v3/index.json
@@ -21,6 +22,7 @@ group Client
     nuget Fable.Remoting.Client ~> 5
     nuget Fulma ~> 2
     nuget Fable.FontAwesome.Free ~> 2
+    nuget Fsharp.Data
 
 group Build
     source https://api.nuget.org/v3/index.json
