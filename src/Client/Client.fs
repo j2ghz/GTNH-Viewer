@@ -15,7 +15,7 @@ open Shared
 // in this case, we are keeping track of a counter
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
-type Model = { Counter: Counter option }
+type Model = { Counter: Counter option; DebugMessage: string }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
@@ -30,15 +30,16 @@ module Server =
     open Fable.Remoting.Client
 
     /// A proxy you can use to talk to server directly
-    let api : ICounterApi =
+    let questAPI : IQuestApi =
       Remoting.createApi()
       |> Remoting.withRouteBuilder Route.builder
-      |> Remoting.buildProxy<ICounterApi>
-let initialCounter = Server.api.initialCounter
+      |> Remoting.buildProxy<IQuestApi>
+
+let initialCounter = Server.questAPI.questList
 
 // defines the initial state and initial command (= side-effect) of the application
 let init () : Model * Cmd<Msg> =
-    let initialModel = { Counter = None }
+    let initialModel = { Counter = None; DebugMessage = "" }
     let loadCountCmd =
         Cmd.OfAsync.perform initialCounter () InitialCountLoaded
     initialModel, loadCountCmd
@@ -55,7 +56,7 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         let nextModel = { currentModel with Counter = Some { Value = counter.Value - 1 } }
         nextModel, Cmd.none
     | _, InitialCountLoaded initialCount->
-        let nextModel = { Counter = Some initialCount }
+        let nextModel = { Counter = Some initialCount, }
         nextModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
@@ -294,7 +295,12 @@ let view (model : Model) (dispatch : Msg -> unit) =
                       [ breadcrump
                         hero
                         info
-                        columns model dispatch ] ] ] ]
+                        columns model dispatch ]
+                    Column.column [ Column.Width (Screen.All, Column.Is9) ]
+                      [ str ]
+
+
+                  ] ] ]
 
 #if DEBUG
 open Elmish.Debug

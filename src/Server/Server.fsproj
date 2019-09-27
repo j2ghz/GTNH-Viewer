@@ -9,5 +9,8 @@
         <Compile Include="..\Shared\Shared.fs" />
         <Compile Include="Server.fs" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="FSharp.Data" Version="3.3.2" />
+    </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

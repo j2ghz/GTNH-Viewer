@@ -19,14 +19,17 @@ let port =
     "SERVER_PORT"
     |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
-let counterApi = {
-    initialCounter = fun () -> async { return { Value = 42 } }
+// Replace by actual file
+let questDB = Shared.BetterQuestingDB.GetSample
+
+let questApi : IQuestApi = {
+    questList = fun () -> async { return BetterQuestingDB.GetSample().QuestDatabase }
 }
 
 let webApp =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue counterApi
+    |> Remoting.fromValue questApi
     |> Remoting.buildHttpHandler
 
 let app = application {
