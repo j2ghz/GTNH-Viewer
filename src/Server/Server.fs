@@ -20,10 +20,18 @@ let port =
     |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
 // Replace by actual file
-let questDB = Shared.BetterQuestingDB.GetSample
+let questDB = Shared.BetterQuestingDB.GetSample()
+
+let mapQuestLine (ql:Shared.BetterQuestingDB.QuestLine) = {
+    Id=ql.LineId
+    Name=ql.Properties.Betterquesting.Name
+    Order=ql.Order
+    Description=ql.Properties.Betterquesting.Desc
+}
 
 let questApi : IQuestApi = {
-    questList = fun () -> async { return BetterQuestingDB.GetSample().QuestDatabase }
+    quests = fun () -> async { return questDB.QuestDatabase }
+    questLines = fun () -> async { return questDB.QuestLines |> Array.map mapQuestLine }
 }
 
 let webApp =

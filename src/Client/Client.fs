@@ -15,14 +15,14 @@ open Shared
 // in this case, we are keeping track of a counter
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
-type Model = { Quests : Shared.BetterQuestingDB.QuestDatabase[] option }
+type Model = { QuestLines : Shared.QuestLine[] option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
     | Increment
     | Decrement
-    | InitialDataLoaded of Shared.BetterQuestingDB.QuestDatabase[]
+    | InitialDataLoaded of Shared.QuestLine[]
 
 module Server =
 
@@ -35,13 +35,11 @@ module Server =
       |> Remoting.withRouteBuilder Route.builder
       |> Remoting.buildProxy<IQuestApi>
 
-let initialCounter = Server.questAPI.questList
-
 // defines the initial state and initial command (= side-effect) of the application
 let init () : Model * Cmd<Msg> =
-    let initialModel = { Quests = None }
+    let initialModel = { QuestLines = None }
     let loadCountCmd =
-        Cmd.OfAsync.perform initialCounter () InitialDataLoaded
+        Cmd.OfAsync.perform Server.questAPI.questLines () InitialDataLoaded
     initialModel, loadCountCmd
 
 // The update function computes the next state of the application based on the current state and the incoming events/messages
@@ -56,7 +54,7 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     //     let nextModel = { currentModel with Counter = Some { Value = counter.Value - 1 } }
     //     nextModel, Cmd.none
     | _, InitialDataLoaded quests->
-        let nextModel = { Quests = Some quests }
+        let nextModel = { QuestLines = Some quests }
         nextModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
@@ -105,15 +103,18 @@ let navBrand =
                         Navbar.Item.a [ ]
                             [ str "Exceptions" ] ] ] ] ]
 
-let menu =
+let showQuestLine ql =
+    Menu.Item.a [ ] [ ql.Name |> str]
+
+let menu (model:Model) =
     Menu.menu [ ]
         [ Menu.label [ ]
-              [ str "General" ]
+              [ str "QuestLines" ]
           Menu.list [ ]
-              [ Menu.Item.a [ ]
-                    [ str "Dashboard" ]
-                Menu.Item.a [ ]
-                    [ str "Customers" ] ]
+              (model.QuestLines 
+              |> Option.defaultValue Array.empty
+              |> Array.map showQuestLine 
+              |> Array.toList)
           Menu.label [ ]
               [ str "Administration" ]
           Menu.list [ ]
@@ -280,34 +281,18 @@ let columns (model : Model) (dispatch : Msg -> unit) =
                         [ Content.content   [ ]
                             [ counter model dispatch ] ] ]   ] ]
 
-let showQuest (q:Shared.BetterQuestingDB.QuestDatabase) = 
-    div [] [
-        h3 [] [q.Properties.Betterquesting.Name |> str]
-        p [] [q.Properties.Betterquesting.Desc |> str]
-    ]
-
-let show (quests:Shared.BetterQuestingDB.QuestDatabase[] option) = 
-    match quests with
-    | Some quests -> quests |> Array.map showQuest
-    | None -> Array.empty
-
-
 let view (model : Model) (dispatch : Msg -> unit) =
     div [ ]
         [ navBrand
           Container.container [ ]
               [ Columns.columns [ ]
                   [ Column.column [ Column.Width (Screen.All, Column.Is3) ]
-                      [ menu ]
+                      [ menu model ]
                     Column.column [ Column.Width (Screen.All, Column.Is9) ]
                       [ breadcrump
                         hero
                         info
-                        columns model dispatch ]
-                    Column.column [ Column.Width (Screen.All, Column.Is9) ]
-                      (model.Quests |> show |> Array.toList)
-
-
+                        columns model dispatch ]                   
                   ] ] ]
 
 #if DEBUG
