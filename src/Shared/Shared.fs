@@ -28,6 +28,7 @@ type Quest = {
     Id: int
     Name: string
     Description : string
+    Prerequisites : int list
 }
 
 type QuestLineWithQuests = {

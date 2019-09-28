@@ -35,7 +35,8 @@ let mapQuestLine (ql : Shared.BetterQuestingDB.QuestLine) =
 let mapQuest (q : Shared.BetterQuestingDB.QuestDatabase) =
     { Id = q.QuestId
       Name = q.Properties.Betterquesting.Name
-      Description = q.Properties.Betterquesting.Desc }
+      Description = q.Properties.Betterquesting.Desc
+      Prerequisites = q.PreRequisites |> Array.toList }
 
 let mapQuestLineQuest (q : Shared.BetterQuestingDB.Quest) =
     { Id = q.Id

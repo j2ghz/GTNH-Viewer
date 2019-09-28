@@ -89,8 +89,28 @@ let menu (model : Model) dispatch =
                                  |> Array.toList) ]
 
 let qlInfo (ql : Shared.QuestLine) =
-    div [] [ h1 [] [ str ql.Name ]
-             p [] [ str ql.Description ] ]
+    Hero.hero [] 
+        [ Hero.body [] 
+              [ Container.container [] 
+                    [ Heading.h1 [] [ str ql.Name ]
+                      Heading.h2 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
+
+let showQuest (q : Quest) =
+    Box.box' [] 
+        [ Heading.h6 [] [ str q.Name ]
+          
+          Heading.h6 [ Heading.IsSubtitle ] 
+              (match q.Prerequisites with
+               | [] -> []
+               | prereqs -> 
+                   ((span [] [ str "Prerequisites: " ]) 
+                    :: [ Tag.list [] 
+                             (prereqs
+                              |> List.map (fun pr -> 
+                                     Tag.tag [ Tag.Color IsInfo ] [ pr
+                                                                    |> string
+                                                                    |> str ])) ]))
+          pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Description ] ]
 
 let questLineView (model : Model) : ReactElement list =
     match model.SelectedQuestLine with
@@ -101,10 +121,7 @@ let questLineView (model : Model) : ReactElement list =
                           [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql -> 
         [ (ql.QuestLine |> qlInfo)
-          div [] (ql.Quests
-                  |> List.map (fun q -> 
-                         div [] [ h2 [] [ str q.Name ]
-                                  p [] [ str q.Description ] ])) ]
+          div [] (ql.Quests |> List.map showQuest) ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
     div [] 
