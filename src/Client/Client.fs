@@ -16,13 +16,13 @@ open Shared
 // the initial value will be requested from server
 type Model =
     { QuestLines : Shared.QuestLine [] option
-      SelectedQuestLine : Shared.BetterQuestingDB.QuestLine option }
+      SelectedQuestLine : Shared.QuestLineWithQuests option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
     | QuestLineSelected of int
-    | QuestLineReceived of Shared.BetterQuestingDB.QuestLine
+    | QuestLineReceived of Shared.QuestLineWithQuests
     | InitialDataLoaded of Shared.QuestLine []
     | Error of exn
 
@@ -53,12 +53,13 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
     | m, InitialDataLoaded quests -> 
         { m with QuestLines = Some quests }, Cmd.none
-    | _, QuestLineSelected i -> 
-        currentModel, 
-        Cmd.OfAsync.either Server.questAPI.questLineById i QuestLineReceived Error
+    | m, QuestLineSelected i -> 
+        { m with SelectedQuestLine = None }, 
+        Cmd.OfAsync.either Server.questAPI.questLineById i QuestLineReceived 
+            Error
     | m, QuestLineReceived ql -> 
         { m with SelectedQuestLine = (Some ql) }, Cmd.none
-    | _, Error e ->
+    | _, Error e -> 
         printf "%O" e
         currentModel, Cmd.none
     | _ -> currentModel, Cmd.none
@@ -73,7 +74,7 @@ let navBrand =
                 Navbar.menu [] 
                     [ Navbar.Start.div [] [ Navbar.Item.a [] [ str "Home" ] ] ] ] ]
 
-let showQuestLine (dispatch : Msg -> unit) ql =
+let showQuestLine (dispatch : Msg -> unit) (ql : QuestLine) =
     Menu.Item.a [ Menu.Item.OnClick(fun _ -> 
                       ql.Id
                       |> QuestLineSelected
@@ -87,15 +88,23 @@ let menu (model : Model) dispatch =
                                  |> Array.map (showQuestLine dispatch)
                                  |> Array.toList) ]
 
+let qlInfo (ql : Shared.QuestLine) =
+    div [] [ h1 [] [ str ql.Name ]
+             p [] [ str ql.Description ] ]
+
 let questLineView (model : Model) : ReactElement list =
     match model.SelectedQuestLine with
     | None -> 
-        [ Hero.hero [ Hero.Color IsInfo ]
-            [ Hero.body [ ]
-                [ Container.container [ ]
-                    [ Heading.h1 [ ] [ str "Select a QuestLine" ] ] ] ] ]
-    | Some ql ->
-        [ ql |> sprintf "%O" |> str ]
+        [ Hero.hero [ Hero.Color IsInfo ] 
+              [ Hero.body [] 
+                    [ Container.container [] 
+                          [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
+    | Some ql -> 
+        [ (ql.QuestLine |> qlInfo)
+          div [] (ql.Quests
+                  |> List.map (fun q -> 
+                         div [] [ h2 [] [ str q.Name ]
+                                  p [] [ str q.Description ] ])) ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
     div [] 
