@@ -24,4 +24,5 @@ type IQuestApi =
     { 
         quests : unit -> Async<BetterQuestingDB.QuestDatabase[]>
         questLines : unit -> Async<QuestLine[]>
+        questLineById : int -> Async<BetterQuestingDB.QuestLine>
     }

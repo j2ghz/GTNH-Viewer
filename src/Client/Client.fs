@@ -8,36 +8,39 @@ open Fable.React
 open Fable.React.Props
 open Fulma
 open Thoth.Json
-
 open Shared
 
 // The model holds data that you want to keep track of while the application is running
 // in this case, we are keeping track of a counter
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
-type Model = { QuestLines : Shared.QuestLine[] option }
+type Model =
+    { QuestLines : Shared.QuestLine [] option
+      SelectedQuestLine : Shared.BetterQuestingDB.QuestLine option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
-    | Increment
-    | Decrement
-    | InitialDataLoaded of Shared.QuestLine[]
+    | QuestLineSelected of int
+    | QuestLineReceived of Shared.BetterQuestingDB.QuestLine
+    | InitialDataLoaded of Shared.QuestLine []
 
 module Server =
-
     open Shared
     open Fable.Remoting.Client
-
+    
     /// A proxy you can use to talk to server directly
     let questAPI : IQuestApi =
-      Remoting.createApi()
-      |> Remoting.withRouteBuilder Route.builder
-      |> Remoting.buildProxy<IQuestApi>
+        Remoting.createApi()
+        |> Remoting.withRouteBuilder Route.builder
+        |> Remoting.buildProxy<IQuestApi>
 
 // defines the initial state and initial command (= side-effect) of the application
-let init () : Model * Cmd<Msg> =
-    let initialModel = { QuestLines = None }
+let init() : Model * Cmd<Msg> =
+    let initialModel =
+        { QuestLines = None
+          SelectedQuestLine = None }
+    
     let loadCountCmd =
         Cmd.OfAsync.perform Server.questAPI.questLines () InitialDataLoaded
     initialModel, loadCountCmd
@@ -47,235 +50,75 @@ let init () : Model * Cmd<Msg> =
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
-    // | Some counter, Increment ->
-    //     let nextModel = { currentModel with Counter = Some { Value = counter.Value + 1 } }
-    //     nextModel, Cmd.none
-    // | Some counter, Decrement ->
-    //     let nextModel = { currentModel with Counter = Some { Value = counter.Value - 1 } }
-    //     nextModel, Cmd.none
-    | _, InitialDataLoaded quests->
-        let nextModel = { QuestLines = Some quests }
-        nextModel, Cmd.none
+    | m, InitialDataLoaded quests -> 
+        { m with QuestLines = Some quests }, Cmd.none
+    | _, QuestLineSelected i -> 
+        currentModel, 
+        Cmd.OfAsync.perform Server.questAPI.questLineById i QuestLineReceived
+    | m, QuestLineReceived ql -> 
+        { m with SelectedQuestLine = (Some ql) }, Cmd.none
     | _ -> currentModel, Cmd.none
 
-
-let safeComponents =
-    let components =
-        span [ ]
-           [ a [ Href "https://github.com/SAFE-Stack/SAFE-template" ]
-               [ str "SAFE  "
-                 str Version.template ]
-             str ", "
-             a [ Href "https://saturnframework.github.io" ] [ str "Saturn" ]
-             str ", "
-             a [ Href "http://fable.io" ] [ str "Fable" ]
-             str ", "
-             a [ Href "https://elmish.github.io" ] [ str "Elmish" ]
-             str ", "
-             a [ Href "https://fulma.github.io/Fulma" ] [ str "Fulma" ]
-             str ", "
-             a [ Href "https://bulmatemplates.github.io/bulma-templates/" ] [ str "Bulma\u00A0Templates" ]
-             str ", "
-             a [ Href "https://zaid-ajaj.github.io/Fable.Remoting/" ] [ str "Fable.Remoting" ]
-
-           ]
-
-    span [ ]
-        [ str "Version "
-          strong [ ] [ str Version.app ]
-          str " powered by: "
-          components ]
-
 let navBrand =
-    Navbar.navbar [ Navbar.Color IsWhite ]
-        [ Container.container [ ]
-            [ Navbar.Brand.div [ ]
-                [ Navbar.Item.a [ Navbar.Item.CustomClass "brand-text" ]
-                      [ str "SAFE Admin" ] ]
-              Navbar.menu [ ]
-                  [ Navbar.Start.div [ ]
-                      [ Navbar.Item.a [ ]
-                            [ str "Home" ]
-                        Navbar.Item.a [ ]
-                            [ str "Orders" ]
-                        Navbar.Item.a [ ]
-                            [ str "Payments" ]
-                        Navbar.Item.a [ ]
-                            [ str "Exceptions" ] ] ] ] ]
+    Navbar.navbar [ Navbar.Color IsWhite ] 
+        [ Container.container [] 
+              [ Navbar.Brand.div [] 
+                    [ Navbar.Item.a [ Navbar.Item.CustomClass "brand-text" ] 
+                          [ str "SAFE Admin" ] ]
+                
+                Navbar.menu [] 
+                    [ Navbar.Start.div [] [ Navbar.Item.a [] [ str "Home" ] ] ] ] ]
 
-let showQuestLine ql =
-    Menu.Item.a [ ] [ ql.Name |> str]
+let showQuestLine (dispatch : Msg -> unit) ql =
+    Menu.Item.a [ Menu.Item.OnClick(fun _ -> 
+                      ql.Id
+                      |> QuestLineSelected
+                      |> dispatch) ] [ ql.Name |> str ]
 
-let menu (model:Model) =
-    Menu.menu [ ]
-        [ Menu.label [ ]
-              [ str "QuestLines" ]
-          Menu.list [ ]
-              (model.QuestLines 
-              |> Option.defaultValue Array.empty
-              |> Array.map showQuestLine 
-              |> Array.toList) ]
+let menu (model : Model) dispatch =
+    Menu.menu [] [ Menu.label [] [ str "QuestLines" ]
+                   Menu.list [] (model.QuestLines
+                                 |> Option.defaultValue Array.empty
+                                 |> Array.sortBy (fun ql -> ql.Order)
+                                 |> Array.map (showQuestLine dispatch)
+                                 |> Array.toList) ]
 
-let breadcrump =
-    Breadcrumb.breadcrumb [ ]
-        [ Breadcrumb.item [ ]
-              [ a [ ] [ str "Bulma" ] ]
-          Breadcrumb.item [ ]
-              [ a [ ] [ str "Templates" ] ]
-          Breadcrumb.item [ ]
-              [ a [ ] [ str "Examples" ] ]
-          Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
-              [ a [ ] [ str "Admin" ] ] ]
-
-let hero =
-    Hero.hero [ Hero.Color IsInfo
-                Hero.CustomClass "welcome" ]
-        [ Hero.body [ ]
-            [ Container.container [ ]
-                [ Heading.h1 [ ]
-                      [ str "Hello, Admin." ]
-                  safeComponents ] ] ]
-
-let info =
-    section [ Class "info-tiles" ]
-        [ Tile.ancestor [ Tile.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Tile.parent [ ]
-                  [ Tile.child [ ]
-                      [ Box.box' [ ]
-                          [ Heading.p [ ]
-                                [ str "439k" ]
-                            Heading.p [ Heading.IsSubtitle ]
-                                [ str "Users" ] ] ] ]
-              Tile.parent [ ]
-                  [ Tile.child [ ]
-                      [ Box.box' [ ]
-                          [ Heading.p [ ]
-                                [ str "59k" ]
-                            Heading.p [ Heading.IsSubtitle ]
-                                [ str "Products" ] ] ] ]
-              Tile.parent [ ]
-                  [ Tile.child [ ]
-                      [ Box.box' [ ]
-                          [ Heading.p [ ]
-                                [ str "3.4k" ]
-                            Heading.p [ Heading.IsSubtitle ]
-                                [ str "Open Orders" ] ] ] ]
-              Tile.parent [ ]
-                  [ Tile.child [ ]
-                      [ Box.box' [ ]
-                          [ Heading.p [ ]
-                                [ str "19" ]
-                            Heading.p [ Heading.IsSubtitle ]
-                                [ str "Exceptions" ] ] ] ] ] ]
-
-let counter (model : Model) (dispatch : Msg -> unit) =
-    Field.div [ Field.IsGrouped ]
-        [ Control.p [ Control.IsExpanded ]
-            [ Input.text
-                [ Input.Disabled true
-                  Input.Value ("0") ] ]
-          Control.p [ ]
-            [ Button.a
-                [ Button.Color IsInfo
-                  Button.OnClick (fun _ -> dispatch Increment) ]
-                [ str "+" ] ]
-          Control.p [ ]
-            [ Button.a
-                [ Button.Color IsInfo
-                  Button.OnClick (fun _ -> dispatch Decrement) ]
-                [ str "-" ] ] ]
-
-let columns (model : Model) (dispatch : Msg -> unit) =
-    Columns.columns [ ]
-        [ Column.column [ Column.Width (Screen.All, Column.Is6) ]
-            [ Card.card [ CustomClass "events-card" ]
-                [ Card.header [ ]
-                    [ Card.Header.title [ ]
-                        [ str "Events" ]
-                      Card.Header.icon [ ]
-                          [ Icon.icon [ ]
-                              [ Fa.i [ Fa.Solid.AngleDown ] [] ] ] ]
-                  div [ Class "card-table" ]
-                      [ Content.content [ ]
-                          [ Table.table
-                              [ Table.IsFullWidth
-                                Table.IsStriped ]
-                              [ tbody [ ]
-                                  [ for _ in 1..10 ->
-                                      tr [ ]
-                                          [ td [ Style [ Width "5%" ] ]
-                                              [ Icon.icon
-                                                  [ ]
-                                                  [ Fa.i [ Fa.Regular.Bell ] [] ] ]
-                                            td [ ]
-                                                [ str "Lorem ipsum dolor aire" ]
-                                            td [ ]
-                                                [ Button.a
-                                                    [ Button.Size IsSmall
-                                                      Button.Color IsPrimary ]
-                                                    [ str "Action" ] ] ] ] ] ] ]
-                  Card.footer [ ]
-                      [ Card.Footer.div [ ]
-                          [ str "View All" ] ] ] ]
-          Column.column [ Column.Width (Screen.All, Column.Is6) ]
-              [ Card.card [ ]
-                  [ Card.header [ ]
-                      [ Card.Header.title [ ]
-                          [ str "Inventory Search" ]
-                        Card.Header.icon [ ]
-                            [ Icon.icon [ ]
-                                [ Fa.i [Fa.Solid.AngleDown] [] ] ] ]
-                    Card.content [ ]
-                        [ Content.content [ ]
-                            [ Control.div
-                                [ Control.HasIconLeft
-                                  Control.HasIconRight ]
-                                [ Input.text
-                                      [ Input.Size IsLarge ]
-                                  Icon.icon
-                                      [ Icon.Size IsMedium
-                                        Icon.IsLeft ]
-                                      [ Fa.i [Fa.Solid.Search] [] ]
-                                  Icon.icon
-                                      [ Icon.Size IsMedium
-                                        Icon.IsRight ]
-                                      [ Fa.i [Fa.Solid.Check] [] ] ] ] ] ]
-                Card.card [ ]
-                    [ Card.header [ ]
-                        [ Card.Header.title [ ]
-                              [ str "Counter" ]
-                          Card.Header.icon [ ]
-                              [ Icon.icon [ ]
-                                  [ Fa.i [Fa.Solid.AngleDown] [] ] ] ]
-                      Card.content [ ]
-                        [ Content.content   [ ]
-                            [ counter model dispatch ] ] ]   ] ]
+let questLineView (model : Model) : ReactElement list =
+    match model.SelectedQuestLine with
+    | None -> 
+        [ Hero.hero [ Hero.Color IsInfo ]
+            [ Hero.body [ ]
+                [ Container.container [ ]
+                    [ Heading.h1 [ ] [ str "Select a QuestLine" ] ] ] ] ]
+    | Some ql ->
+        [ ql.JsonValue.ToString() |> str ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
-    div [ ]
+    div [] 
         [ navBrand
-          Container.container [ ]
-              [ Columns.columns [ ]
-                  [ Column.column [ Column.Width (Screen.All, Column.Is3) ]
-                      [ menu model ]
-                    Column.column [ Column.Width (Screen.All, Column.Is9) ]
-                      [ breadcrump
-                        hero
-                        info
-                        columns model dispatch ]                   
-                  ] ] ]
-
+          
+          Container.container [] 
+              [ Columns.columns [] 
+                    [ Column.column [ Column.Width(Screen.All, Column.Is3) ] 
+                          [ menu model dispatch ]
+                      
+                      Column.column [ Column.Width(Screen.All, Column.Is9) ] 
+                          [ div [] (questLineView model) ] ] ] ]
 #if DEBUG
+
 open Elmish.Debug
 open Elmish.HMR
 #endif
+
 
 Program.mkProgram init update view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
+
 |> Program.withReactBatched "elmish-app"
 #if DEBUG
 |> Program.withDebugger
 #endif
+
 |> Program.run

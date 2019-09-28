@@ -32,6 +32,7 @@ let mapQuestLine (ql:Shared.BetterQuestingDB.QuestLine) = {
 let questApi : IQuestApi = {
     quests = fun () -> async { return questDB.QuestDatabase }
     questLines = fun () -> async { return questDB.QuestLines |> Array.map mapQuestLine }
+    questLineById = fun id -> async { return questDB.QuestLines |> Array.find (fun ql -> ql.LineId = id)}
 }
 
 let webApp =
