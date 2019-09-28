@@ -114,37 +114,7 @@ let menu (model:Model) =
               (model.QuestLines 
               |> Option.defaultValue Array.empty
               |> Array.map showQuestLine 
-              |> Array.toList)
-          Menu.label [ ]
-              [ str "Administration" ]
-          Menu.list [ ]
-              [ Menu.Item.a [ ]
-                  [ str "Team Settings" ]
-                li [ ]
-                    [ a [ ]
-                        [ str "Manage Your Team" ]
-                      Menu.list [ ]
-                          [ Menu.Item.a [ ]
-                                [ str "Members" ]
-                            Menu.Item.a [ ]
-                                [ str "Plugins" ]
-                            Menu.Item.a [ ]
-                                [ str "Add a member" ] ] ]
-                Menu.Item.a [ ]
-                    [ str "Invitations" ]
-                Menu.Item.a [ ]
-                    [ str "Cloud Storage Environment Settings" ]
-                Menu.Item.a [ ]
-                    [ str "Authentication" ] ]
-          Menu.label [ ]
-              [ str "Transactions" ]
-          Menu.list [ ]
-              [ Menu.Item.a [ ]
-                    [ str "Payments" ]
-                Menu.Item.a [ ]
-                    [ str "Transfers" ]
-                Menu.Item.a [ ]
-                    [ str "Balance" ] ] ]
+              |> Array.toList) ]
 
 let breadcrump =
     Breadcrumb.breadcrumb [ ]
