@@ -95,7 +95,7 @@ let questLineView (model : Model) : ReactElement list =
                 [ Container.container [ ]
                     [ Heading.h1 [ ] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql ->
-        [ ql.Properties.Betterquesting.Desc |> str ]
+        [ ql |> sprintf "%O" |> str ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
     div [] 
