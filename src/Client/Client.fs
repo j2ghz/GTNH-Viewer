@@ -24,6 +24,7 @@ type Msg =
     | QuestLineSelected of int
     | QuestLineReceived of Shared.BetterQuestingDB.QuestLine
     | InitialDataLoaded of Shared.QuestLine []
+    | Error of exn
 
 module Server =
     open Shared
@@ -54,9 +55,12 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         { m with QuestLines = Some quests }, Cmd.none
     | _, QuestLineSelected i -> 
         currentModel, 
-        Cmd.OfAsync.perform Server.questAPI.questLineById i QuestLineReceived
+        Cmd.OfAsync.either Server.questAPI.questLineById i QuestLineReceived Error
     | m, QuestLineReceived ql -> 
         { m with SelectedQuestLine = (Some ql) }, Cmd.none
+    | _, Error e ->
+        printf "%O" e
+        currentModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
 let navBrand =
@@ -91,7 +95,7 @@ let questLineView (model : Model) : ReactElement list =
                 [ Container.container [ ]
                     [ Heading.h1 [ ] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql ->
-        [ ql.JsonValue.ToString() |> str ]
+        [ ql.Properties.Betterquesting.Desc |> str ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
     div [] 
