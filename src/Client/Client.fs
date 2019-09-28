@@ -97,7 +97,7 @@ let qlInfo (ql : Shared.QuestLine) =
 
 let showQuest (q : Quest) =
     Box.box' [] 
-        [ Heading.h6 [] [ str q.Name ]
+        [ a [ q.Id |> sprintf "#%i" |> Href ] [ Heading.h6 [ Heading.Props [q.Id |> string |> Id ] ] [ str q.Name ] ]
           
           Heading.h6 [ Heading.IsSubtitle ] 
               (match q.Prerequisites with
@@ -112,6 +112,18 @@ let showQuest (q : Quest) =
                                                                     |> str ])) ]))
           pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Description ] ]
 
+let showQuestLineQuest (qlq : QuestLineQuest) =
+    let (x, y) = qlq.Location
+    let (sx, sy) = qlq.Size
+    a [ qlq.Id
+        |> sprintf "#%i"
+        |> Href ] [ div [ Style [ Height sx
+                                  Width sy
+                                  Position PositionOptions.Absolute
+                                  Top x
+                                  Left y
+                                  Background "#000" ] ] [] ]
+
 let questLineView (model : Model) : ReactElement list =
     match model.SelectedQuestLine with
     | None -> 
@@ -121,6 +133,14 @@ let questLineView (model : Model) : ReactElement list =
                           [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql -> 
         [ (ql.QuestLine |> qlInfo)
+          div [ Style [ 
+                  Height (ql.QuestLineQuests |> List.map (fun q -> fst q.Location + fst q.Size) |> List.max)
+                  Width (ql.QuestLineQuests |> List.map (fun q -> snd q.Location + snd q.Size) |> List.max)
+                  Position PositionOptions.Relative
+                  Overflow "auto" ]; 
+              Class "box" ]
+              (ql.QuestLineQuests |> List.map showQuestLineQuest)
+          
           div [] (ql.Quests |> List.map showQuest) ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
