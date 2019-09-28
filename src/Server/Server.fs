@@ -42,6 +42,8 @@ let mapQuestLineQuest (q : Shared.BetterQuestingDB.Quest) =
       Location = (q.X, q.Y)
       Size = (q.SizeX, q.SizeY) }
 
+let getQuestById id = questDB.QuestDatabase |> Array.find (fun q -> q.QuestId = id)
+
 let questApi : IQuestApi =
     { quests =
           fun () -> async { return questDB.QuestDatabase |> Array.map mapQuest }
@@ -54,13 +56,14 @@ let questApi : IQuestApi =
                   let ql =
                       questDB.QuestLines 
                       |> Array.find (fun ql -> ql.LineId = id)
+                  let qlq = ql.Quests |> Array.map mapQuestLineQuest |> Array.toList
                   return { QuestLine =
                                { Id = ql.LineId
                                  Order = ql.Order
                                  Name = ql.Properties.Betterquesting.Name
                                  Description = ql.Properties.Betterquesting.Desc }
-                           QuestLineQuests = ql.Quests |> Array.map mapQuestLineQuest |> Array.toList
-                           Quests = [] }
+                           QuestLineQuests = qlq
+                           Quests = qlq |> List.map (fun q -> q.Id) |> List.map (getQuestById >> mapQuest)  }
               } }
 
 let webApp =
