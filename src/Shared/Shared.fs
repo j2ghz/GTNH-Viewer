@@ -7,7 +7,7 @@ module Route =
     let builder typeName methodName =
         sprintf "/api/%s/%s" typeName methodName
 
-type QuestLine = {
+type QuestLineInfo = {
     Id : int
     Name : string
     Order : int
@@ -28,8 +28,8 @@ type QuestLineQuest = {
     Quest : Quest
 }
 
-type QuestLineWithQuests = {
-    QuestLine : QuestLine
+type QuestLine = {
+    QuestLineInfo : QuestLineInfo
     Quests : QuestLineQuest list
 }
 
@@ -38,6 +38,6 @@ type QuestLineWithQuests = {
 type IQuestApi =
     { 
         quests : unit -> Async<Quest list>
-        questLines : unit -> Async<QuestLine list>
-        questLineById : int -> Async<QuestLineWithQuests>
+        questLines : unit -> Async<QuestLineInfo list>
+        questLineById : int -> Async<QuestLine>
     }

@@ -15,15 +15,15 @@ open Shared
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
 type Model =
-    { QuestLines : Shared.QuestLine [] option
-      SelectedQuestLine : Shared.QuestLineWithQuests option }
+    { QuestLines : Shared.QuestLineInfo list option
+      SelectedQuestLine : Shared.QuestLine option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
     | QuestLineSelected of int
-    | QuestLineReceived of Shared.QuestLineWithQuests
-    | InitialDataLoaded of Shared.QuestLine []
+    | QuestLineReceived of Shared.QuestLine
+    | InitialDataLoaded of Shared.QuestLineInfo list
     | Error of exn
 
 module Server =
@@ -43,7 +43,7 @@ let init() : Model * Cmd<Msg> =
           SelectedQuestLine = None }
     
     let loadCountCmd =
-        Cmd.OfAsync.perform Server.questAPI.questLines () InitialDataLoaded
+        Cmd.OfAsync.either Server.questAPI.questLines () InitialDataLoaded Error
     initialModel, loadCountCmd
 
 // The update function computes the next state of the application based on the current state and the incoming events/messages
@@ -64,6 +64,8 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         currentModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
+
+//NAVBAR
 let navBrand =
     Navbar.navbar [ Navbar.Color IsWhite ] 
         [ Container.container [] 
@@ -73,8 +75,8 @@ let navBrand =
                 
                 Navbar.menu [] 
                     [ Navbar.Start.div [] [ Navbar.Item.a [] [ str "Home" ] ] ] ] ]
-
-let showQuestLine (dispatch : Msg -> unit) (ql : QuestLine) =
+//MENU
+let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =
     Menu.Item.a [ Menu.Item.OnClick(fun _ -> 
                       ql.Id
                       |> QuestLineSelected
@@ -83,24 +85,23 @@ let showQuestLine (dispatch : Msg -> unit) (ql : QuestLine) =
 let menu (model : Model) dispatch =
     Menu.menu [] [ Menu.label [] [ str "QuestLines" ]
                    Menu.list [] (model.QuestLines
-                                 |> Option.defaultValue Array.empty
-                                 |> Array.sortBy (fun ql -> ql.Order)
-                                 |> Array.map (showQuestLine dispatch)
-                                 |> Array.toList) ]
+                                 |> Option.defaultValue List.empty
+                                 |> List.sortBy (fun ql -> ql.Order)
+                                 |> List.map (showQuestLine dispatch) ) ]
 
-let qlInfo (ql : Shared.QuestLine) =
+let qlInfo (ql : Shared.QuestLineInfo) =
     Hero.hero [] 
         [ Hero.body [] 
               [ Container.container [] 
                     [ Heading.h1 [] [ str ql.Name ]
                       Heading.h2 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
 
-let showQuest (q : Quest) =
+let showQuest (q : QuestLineQuest) =
     Box.box' [] 
-        [ a [ q.Id |> sprintf "#%i" |> Href ] [ Heading.h6 [ Heading.Props [q.Id |> string |> Id ] ] [ str q.Name ] ]
+        [ a [ q.Id |> sprintf "#%i" |> Href ] [ Heading.h6 [ Heading.Props [q.Id |> string |> Id ] ] [ str q.Quest.Name ] ]
           
           Heading.h6 [ Heading.IsSubtitle ] 
-              (match q.Prerequisites with
+              (match q.Quest.Prerequisites with
                | [] -> []
                | prereqs -> 
                    ((span [] [ str "Prerequisites: " ]) 
@@ -110,7 +111,7 @@ let showQuest (q : Quest) =
                                      Tag.tag [ Tag.Color IsInfo ] [ pr
                                                                     |> string
                                                                     |> str ])) ]))
-          pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Description ] ]
+          pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Quest.Description ] ]
 
 let showQuestLineQuest (qlq : QuestLineQuest) =
     let (x, y) = qlq.Location
@@ -132,14 +133,14 @@ let questLineView (model : Model) : ReactElement list =
                     [ Container.container [] 
                           [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql -> 
-        [ (ql.QuestLine |> qlInfo)
+        [ (ql.QuestLineInfo |> qlInfo)
           div [ Style [ 
-                  Height (ql.QuestLineQuests |> List.map (fun q -> fst q.Location + fst q.Size) |> List.max)
-                  Width (ql.QuestLineQuests |> List.map (fun q -> snd q.Location + snd q.Size) |> List.max)
+                  Height (ql.Quests |> List.map (fun q -> fst q.Location + fst q.Size) |> List.max)
+                  Width (ql.Quests |> List.map (fun q -> snd q.Location + snd q.Size) |> List.max)
                   Position PositionOptions.Relative
                   Overflow "auto" ]; 
               Class "box" ]
-              (ql.QuestLineQuests |> List.map showQuestLineQuest)
+              (ql.Quests |> List.map showQuestLineQuest)
           
           div [] (ql.Quests |> List.map showQuest) ]
 

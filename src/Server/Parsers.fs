@@ -46,9 +46,9 @@ module BQv2 =
     let getQuestLineQuests =
         questDB.QuestLines
         |> Array.map (fun ql -> {
-            QuestLine=mapQuestLine ql
+            QuestLineInfo=mapQuestLine ql
             Quests=mapQuestLineQuests getQuests ql
         })
         |> Array.toList
 
-    let getQuestLineById id = getQuestLineQuests |> List.find (fun ql -> ql.QuestLine.Id = id)
+    let getQuestLineById id = getQuestLineQuests |> List.find (fun ql -> ql.QuestLineInfo.Id = id)
