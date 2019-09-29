@@ -24,21 +24,21 @@ let port =
     |> Option.defaultValue 8085us
 
 // Replace by actual file
-let questDB = Shared.BetterQuestingDB.GetSample()
+let questDB = Parsers.BetterQuestingDB.GetSample()
 
-let mapQuestLine (ql : Shared.BetterQuestingDB.QuestLine) =
+let mapQuestLine (ql : Parsers.BetterQuestingDB.QuestLine) =
     { Id = ql.LineId
       Name = ql.Properties.Betterquesting.Name
       Order = ql.Order
       Description = ql.Properties.Betterquesting.Desc }
 
-let mapQuest (q : Shared.BetterQuestingDB.QuestDatabase) =
+let mapQuest (q : Parsers.BetterQuestingDB.QuestDatabase) =
     { Id = q.QuestId
       Name = q.Properties.Betterquesting.Name
       Description = q.Properties.Betterquesting.Desc
       Prerequisites = q.PreRequisites |> Array.toList }
 
-let mapQuestLineQuest (q : Shared.BetterQuestingDB.Quest) =
+let mapQuestLineQuest (q : Parsers.BetterQuestingDB.Quest) =
     { Id = q.Id
       Location = (q.X, q.Y)
       Size = (q.SizeX, q.SizeY) }
