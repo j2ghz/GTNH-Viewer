@@ -24,7 +24,9 @@ module BQv2 =
         { Id = q.QuestId
           Name = q.Properties.Betterquesting.Name
           Description = q.Properties.Betterquesting.Desc
-          Prerequisites = q.PreRequisites |> Array.toList }
+          Prerequisites = q.PreRequisites |> Array.toList
+          Icon = q.Properties.Betterquesting.Icon.Id
+          Main = q.Properties.Betterquesting.IsMain }
     let getQuests =
         questDB.QuestDatabase
         |> Array.map mapQuest

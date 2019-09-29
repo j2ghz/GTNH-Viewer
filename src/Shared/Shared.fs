@@ -19,6 +19,8 @@ type Quest = {
     Name: string
     Description : string
     Prerequisites : int list
+    Icon : string
+    Main : bool
 }
 
 type QuestLineQuest = {
