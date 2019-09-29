@@ -64,6 +64,7 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         currentModel, Cmd.none
     | _ -> currentModel, Cmd.none
 
+let stri = sprintf "%i" >> str
 
 //NAVBAR
 let navBrand =
@@ -75,6 +76,7 @@ let navBrand =
                 
                 Navbar.menu [] 
                     [ Navbar.Start.div [] [ Navbar.Item.a [] [ str "Home" ] ] ] ] ]
+
 //MENU
 let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =
     Menu.Item.a [ Menu.Item.OnClick(fun _ -> 
@@ -87,7 +89,7 @@ let menu (model : Model) dispatch =
                    Menu.list [] (model.QuestLines
                                  |> Option.defaultValue List.empty
                                  |> List.sortBy (fun ql -> ql.Order)
-                                 |> List.map (showQuestLine dispatch) ) ]
+                                 |> List.map (showQuestLine dispatch)) ]
 
 let qlInfo (ql : Shared.QuestLineInfo) =
     Hero.hero [] 
@@ -96,22 +98,51 @@ let qlInfo (ql : Shared.QuestLineInfo) =
                     [ Heading.h1 [] [ str ql.Name ]
                       Heading.h2 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
 
+let showPrerequisite pr =
+    a [ pr
+        |> sprintf "#%i"
+        |> Href ] [ Tag.tag [ Tag.Color IsInfo ] [ pr
+                                                   |> string
+                                                   |> str ] ]
+
 let showQuest (q : QuestLineQuest) =
     Box.box' [] 
-        [ a [ q.Id |> sprintf "#%i" |> Href ] [ Heading.h6 [ Heading.Props [q.Id |> string |> Id ] ] [ str q.Quest.Name ] ]
+        [ a 
+            [ q.Id |> sprintf "#%i" |> Href ] 
+            [ Heading.h4 
+                [ Heading.Props [ q.Id |> string |> Id ] ] 
+                [ Tag.tag [ Tag.Size IsLarge; Tag.Color IsDark ] [ stri q.Id ]; str q.Quest.Name ] ]
           
-          Heading.h6 [ Heading.IsSubtitle ] 
+          div [ ] 
               (match q.Quest.Prerequisites with
                | [] -> []
                | prereqs -> 
-                   ((span [] [ str "Prerequisites: " ]) 
-                    :: [ Tag.list [] 
-                             (prereqs
-                              |> List.map (fun pr -> 
-                                     Tag.tag [ Tag.Color IsInfo ] [ pr
-                                                                    |> string
-                                                                    |> str ])) ]))
+                   [ (Tag.list [] (prereqs |> List.map showPrerequisite)) ])
           pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Quest.Description ] ]
+
+    Card.card [ Props [ q.Id |> string |> Id ] ]
+        [ Card.header [ ]
+            [ Card.Header.title [ ]
+                [ str q.Quest.Name ]
+              Card.Header.icon [ Props [ q.Id |> sprintf "#%i" |> Href ] ]
+                [ i [ ClassName "fa fa-hashtag" ] [ ] ] ]
+          Card.content [ ]
+            [ Content.content [ ]
+                 (match q.Quest.Prerequisites with
+                   | [] -> List.empty
+                   | prereqs -> [ (Tag.list [] (prereqs |> List.map showPrerequisite)) ]) ]]
+          Card.content [ ]
+            [ Content.content [ ]
+                [ pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Quest.Description ] ] ]
+          Card.footer [ ]
+            [ Card.Footer.a [ ]
+                [ str "Save" ]
+              Card.Footer.a [ ]
+                [ str "Edit" ]
+              Card.Footer.a [ ]
+                [ str "Delete" ] ] ]
+
+    
 
 let showQuestLineQuest (qlq : QuestLineQuest) =
     let (x, y) = qlq.Location
@@ -134,14 +165,16 @@ let questLineView (model : Model) : ReactElement list =
                           [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
     | Some ql -> 
         [ (ql.QuestLineInfo |> qlInfo)
-          div [ Style [ 
-                  Height (ql.Quests |> List.map (fun q -> fst q.Location + fst q.Size) |> List.max)
-                  Width (ql.Quests |> List.map (fun q -> snd q.Location + snd q.Size) |> List.max)
-                  Position PositionOptions.Relative
-                  Overflow "auto" ]; 
-              Class "box" ]
-              (ql.Quests |> List.map showQuestLineQuest)
-          
+          div [ Style [ Height(ql.Quests
+                               |> List.map 
+                                      (fun q -> fst q.Location + fst q.Size)
+                               |> List.max)
+                        Width(ql.Quests
+                              |> List.map (fun q -> snd q.Location + snd q.Size)
+                              |> List.max)
+                        Position PositionOptions.Relative
+                        Overflow "auto" ]
+                Class "box" ] (ql.Quests |> List.map showQuestLineQuest)
           div [] (ql.Quests |> List.map showQuest) ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
