@@ -14,12 +14,6 @@ type QuestLine = {
     Description : string
 }
 
-type QuestLineQuest = {
-    Id : int
-    Location : int * int
-    Size : int * int
-}
-
 type Quest = {
     Id: int
     Name: string
@@ -27,17 +21,23 @@ type Quest = {
     Prerequisites : int list
 }
 
+type QuestLineQuest = {
+    Id : int
+    Location : int * int
+    Size : int * int
+    Quest : Quest
+}
+
 type QuestLineWithQuests = {
     QuestLine : QuestLine
-    QuestLineQuests : QuestLineQuest list
-    Quests : Quest list
+    Quests : QuestLineQuest list
 }
 
 /// A type that specifies the communication protocol between client and server
 /// to learn more, read the docs at https://zaid-ajaj.github.io/Fable.Remoting/src/basics.html
 type IQuestApi =
     { 
-        quests : unit -> Async<Quest[]>
-        questLines : unit -> Async<QuestLine[]>
+        quests : unit -> Async<Quest list>
+        questLines : unit -> Async<QuestLine list>
         questLineById : int -> Async<QuestLineWithQuests>
     }
