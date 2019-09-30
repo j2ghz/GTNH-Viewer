@@ -14,7 +14,7 @@ release.sh
 *.DotSettings.user
 deploy
 .ionide/
-
+icons/
 
 # Created by https://www.gitignore.io/api/node,linux,fsharp,csharp,windows
 # Edit at https://www.gitignore.io/?templates=node,linux,fsharp,csharp,windows

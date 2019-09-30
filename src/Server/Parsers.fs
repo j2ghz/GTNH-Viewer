@@ -25,7 +25,7 @@ module BQv3 =
           Name = q.Properties.Betterquesting.Name
           Description = q.Properties.Betterquesting.Desc
           Prerequisites = q.PreRequisites |> Array.toList
-          Icon = q.Properties.Betterquesting.Icon.Id
+          Icon = q.Properties.Betterquesting.Icon.Id + ":" + q.Properties.Betterquesting.Icon.Damage.ToString()
           Main = q.Properties.Betterquesting.IsMain }
     let getQuests =
         questDB.QuestDatabase
