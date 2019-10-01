@@ -24,9 +24,9 @@ let port =
     |> Option.defaultValue 8085us
 
 let questApi : IQuestApi =
-    { quests = fun () -> async { return Parsers.BQv3.getQuests }
-      questLines = fun () -> async { return Parsers.BQv3.getQuestLines }
-      questLineById = fun id -> async { return Parsers.BQv3.getQuestLineById id } }
+    { quests = fun () -> async { return Parsers.BQv1.getQuests }
+      questLines = fun () -> async { return Parsers.BQv1.getQuestLines }
+      questLineById = fun id -> async { return Parsers.BQv1.getQuestLineById id } }
 
 let webApp =
     Remoting.createApi()

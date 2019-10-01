@@ -2,11 +2,11 @@ module Parsers
 
 module BQv3 =
     open Shared
-    
+
     // must be pre-processed with:
     // jq 'walk( if type == "object" then with_entries( .key |= sub( ":.+$"; "") ) else . end ) | walk( if type == "object" and has("0") then . | to_entries | map_values(.value) else . end)' DefaultQuests.json > DefaultQuests-cleaned.json
     type private BetterQuestingDB = FSharp.Data.JsonProvider<"../Shared/SampleData/DefaultQuests-master-cleaned.json">
-    
+
     // Replace by actual file
     let questDB = BetterQuestingDB.GetSample()
 
@@ -50,6 +50,58 @@ module BQv3 =
         |> Array.map (fun ql -> {
             QuestLineInfo=mapQuestLine ql
             Quests=mapQuestLineQuests getQuests ql
+        })
+        |> Array.toList
+
+    let getQuestLineById id = getQuestLineQuests |> List.find (fun ql -> ql.QuestLineInfo.Id = id)
+
+module BQv1 =
+    open Shared
+
+    type private BetterQuestingDB = FSharp.Data.JsonProvider<"../Shared/SampleData/DefaultQuests-2.0.7.5-cleaned.json">
+
+    let questDB = BetterQuestingDB.GetSample()
+
+    let mapQuestLine id (ql : BetterQuestingDB.QuestLine) =
+        { Id = id
+          Name = ql.Name
+          Order = id
+          Description = ql.Description }
+    let getQuestLines =
+        questDB.QuestLines
+        |> Array.mapi mapQuestLine
+        |> Array.toList
+
+    let mapQuest (q : BetterQuestingDB.QuestDatabase) =
+        { Id = q.QuestId
+          Name = q.Name
+          Description = q.Description
+          Prerequisites = q.PreRequisites |> Array.toList
+          Icon = q.Icon.Id
+          Main = q.IsMain }
+    let getQuests =
+        questDB.QuestDatabase
+        |> Array.map mapQuest
+        |> Array.toList
+
+    let mapQuestLineQuests (qs : Quest list) (ql : BetterQuestingDB.QuestLine) =
+        query {
+            for q in ql.Quests do
+            join x in qs
+                on (q.Id = x.Id)
+            select {
+                    Id= q.Id
+                    Location= (q.X,q.Y)
+                    Size=(24,24)
+                    Quest= x
+                   }
+        } |> Seq.toList
+
+    let getQuestLineQuests =
+        questDB.QuestLines
+        |> Array.mapi (fun i ql -> {
+            QuestLineInfo=mapQuestLine i ql
+            Quests=mapQuestLineQuests  getQuests ql
         })
         |> Array.toList
 
