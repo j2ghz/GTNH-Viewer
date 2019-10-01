@@ -15,21 +15,25 @@ open Shared
 // we mark it as optional, because initially it will not be available from the client
 // the initial value will be requested from server
 type Model =
-    { QuestLines : Shared.QuestLineInfo list option
+    { QuestSources : string list option
+      SelectedSource : string option
+      QuestLines : Shared.QuestLineInfo list option
       SelectedQuestLine : Shared.QuestLine option }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
     | QuestLineSelected of int
+    | SourcesLoaded of string list
+    | SourceSelected of string
     | QuestLineReceived of Shared.QuestLine
-    | InitialDataLoaded of Shared.QuestLineInfo list
+    | QuestLinesLoaded of Shared.QuestLineInfo list
     | Error of exn
 
 module Server =
     open Shared
     open Fable.Remoting.Client
-
+    
     /// A proxy you can use to talk to server directly
     let questAPI : IQuestApi =
         Remoting.createApi()
@@ -39,11 +43,13 @@ module Server =
 // defines the initial state and initial command (= side-effect) of the application
 let init() : Model * Cmd<Msg> =
     let initialModel =
-        { QuestLines = None
+        { QuestSources = None
+          SelectedSource = None
+          QuestLines = None
           SelectedQuestLine = None }
-
+    
     let loadCountCmd =
-        Cmd.OfAsync.either Server.questAPI.questLines () InitialDataLoaded Error
+        Cmd.OfAsync.either Server.questAPI.sources () SourcesLoaded Error
     initialModel, loadCountCmd
 
 // The update function computes the next state of the application based on the current state and the incoming events/messages
@@ -51,86 +57,118 @@ let init() : Model * Cmd<Msg> =
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
-    | m, InitialDataLoaded quests ->
+    | m, SourcesLoaded s -> 
+        { m with QuestSources = Some s
+                 SelectedSource = None }, Cmd.none
+    | m, SourceSelected s -> 
+        { m with SelectedSource = Some s; SelectedQuestLine = None }, 
+        Cmd.OfAsync.either Server.questAPI.questLines s QuestLinesLoaded Error
+    | m, QuestLinesLoaded quests -> 
         { m with QuestLines = Some quests }, Cmd.none
-    | m, QuestLineSelected i ->
-        { m with SelectedQuestLine = None },
-        Cmd.OfAsync.either Server.questAPI.questLineById i QuestLineReceived
-            Error
-    | m, QuestLineReceived ql ->
+    | m, QuestLineSelected i -> 
+        let req =
+            Server.questAPI.questLineById 
+                (m.SelectedSource |> Option.defaultValue "")
+        { m with SelectedQuestLine = None }, 
+        Cmd.OfAsync.either req i QuestLineReceived Error
+    | m, QuestLineReceived ql -> 
         { m with SelectedQuestLine = (Some ql) }, Cmd.none
-    | _, Error e ->
+    | _, Error e -> 
         printf "%O" e
         currentModel, Cmd.none
-    | _ -> currentModel, Cmd.none
 
+//    | _ -> currentModel, Cmd.none
 let stri = sprintf "%i" >> str
 
-//NAVBAR
-let navBrand =
-    Navbar.navbar [ Navbar.Color IsWhite ]
-        [ Container.container []
-              [ Navbar.Brand.div []
-                    [ Navbar.Item.a [ Navbar.Item.CustomClass "brand-text" ]
-                          [ str "SAFE Admin" ] ]
+let navSource (model : Model) (dispatch : Msg -> unit) source =
+    Navbar.Item.a [ Navbar.Item.Props [ OnClick(fun _ -> 
+                                            source
+                                            |> SourceSelected
+                                            |> dispatch) ]
+                    (model.SelectedSource
+                     |> Option.defaultValue ""
+                     |> (=) source
+                     |> Navbar.Item.IsActive) ] [ str source ]
 
-                Navbar.menu []
-                    [ Navbar.Start.div [] [ Navbar.Item.a [] [ str "Home" ] ] ] ] ]
+//NAVBAR
+let navBrand (model : Model) (dispatch : Msg -> unit) =
+    Navbar.navbar [ Navbar.Color IsWhite ] 
+        [ Container.container [] 
+              [ Navbar.Brand.div [] 
+                    [ Navbar.Item.a [ Navbar.Item.CustomClass "brand-text" ] 
+                          [ str "SAFE Admin" ] ]
+                
+                Navbar.menu [] 
+                    [ Navbar.Start.div [] 
+                          (match model.QuestSources with
+                           | None -> []
+                           | Some sources -> 
+                               sources |> List.map (navSource model dispatch)) ] ] ]
 
 //MENU
 let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =
-    Menu.Item.a [ Menu.Item.OnClick(fun _ ->
+    Menu.Item.a [ Menu.Item.OnClick(fun _ -> 
                       ql.Id
                       |> QuestLineSelected
                       |> dispatch) ] [ ql.Name |> str ]
 
 let menu (model : Model) dispatch =
-    Menu.menu [] [ Menu.label [] [ str "QuestLines" ]
-                   Menu.list [] (model.QuestLines
-                                 |> Option.defaultValue List.empty
-                                 |> List.sortBy (fun ql -> ql.Order)
-                                 |> List.map (showQuestLine dispatch)) ]
+    Menu.menu []
+        (match model.QuestLines with
+        | None -> [Menu.Item.a [] [ str "Select a source on top" ] ]
+        | Some ql -> [
+            Menu.label [] [ str "QuestLines" ]
+            Menu.list [] (ql |> List.sortBy (fun ql -> ql.Order) |> List.map (showQuestLine dispatch))
+            ]
+        )
+        
+                 
 
 let qlInfo (ql : Shared.QuestLineInfo) =
-    Hero.hero []
-        [ Hero.body []
-              [ Container.container []
+    Hero.hero [] 
+        [ Hero.body [] 
+              [ Container.container [] 
                     [ Heading.h1 [] [ str ql.Name ]
                       Heading.h2 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
 
 let showPrerequisite pr =
     a [ pr
         |> sprintf "#%i"
-        |> Href ] [ Tag.tag [ ] [ pr
-                                                   |> string
-                                                   |> str ] ]
+        |> Href ] [ Tag.tag [] [ pr
+                                 |> string
+                                 |> str ] ]
 
 let showQuest (q : QuestLineQuest) =
-    Card.card [ Props [ q.Id |> string |> Id ] ]
-        [ Card.header [ ]
-            [ Card.Header.title [ ]
-                [ str q.Quest.Name ]
-              Card.Header.icon [ Props [ q.Id |> sprintf "#%i" |> Href ] ]
-                [ i [ ClassName "fa fa-hashtag" ] [ ] ] ]
-          Card.content [ ]
-            [ Content.content [ ]
-                 (match q.Quest.Prerequisites with
-                   | [] -> List.empty
-                   | prereqs -> [ (Tag.list [] (prereqs |> List.map showPrerequisite)) ]) ]
-          Card.content [ ]
-            [ Content.content [ ]
-                [ pre [ Style [ WhiteSpace "pre-wrap" ] ] [ str q.Quest.Description ] ] ]
-        //   Card.footer [ ]
-        //     [ Card.Footer.a [ ]
-        //         [ str "Save" ]
-        //       Card.Footer.a [ ]
-        //         [ str "Edit" ]
-        //       Card.Footer.a [ ]
-        //         [ str "Delete" ] ]
-        ]
+    Card.card [ Props [ q.Id
+                        |> string
+                        |> Id ] ] 
+        [ Card.header [] 
+              [ Card.Header.title [] [ str q.Quest.Name ]
+                
+                Card.Header.icon [ Props [ q.Id
+                                           |> sprintf "#%i"
+                                           |> Href ] ] 
+                    [ i [ ClassName "fa fa-hashtag" ] [] ] ]
+          
+          Card.content [] 
+              [ Content.content [] 
+                    (match q.Quest.Prerequisites with
+                     | [] -> List.empty
+                     | prereqs -> 
+                         [ (Tag.list [] (prereqs |> List.map showPrerequisite)) ]) ]
+          
+          Card.content [] 
+              [ Content.content [] 
+                    [ pre [ Style [ WhiteSpace "pre-wrap" ] ] 
+                          [ str q.Quest.Description ] ] ] ]
 
-
-
+//   Card.footer [ ]
+//     [ Card.Footer.a [ ]
+//         [ str "Save" ]
+//       Card.Footer.a [ ]
+//         [ str "Edit" ]
+//       Card.Footer.a [ ]
+//         [ str "Delete" ] ]
 let showQuestLineQuest (qlq : QuestLineQuest) =
     let (x, y) = qlq.Location
     let (sx, sy) = qlq.Size
@@ -145,15 +183,15 @@ let showQuestLineQuest (qlq : QuestLineQuest) =
 
 let questLineView (model : Model) : ReactElement list =
     match model.SelectedQuestLine with
-    | None ->
-        [ Hero.hero [ Hero.Color IsInfo ]
-              [ Hero.body []
-                    [ Container.container []
-                          [ Heading.h1 [] [ str "Select a QuestLine" ] ] ] ] ]
-    | Some ql ->
+    | None -> 
+        [ Hero.hero [ Hero.Color IsInfo ] 
+              [ Hero.body [] 
+                    [ Container.container [] 
+                          [ Heading.h1 [] [ str "Select a QuestLine on the left" ] ] ] ] ]
+    | Some ql -> 
         [ (ql.QuestLineInfo |> qlInfo)
           div [ Style [ Height(ql.Quests
-                               |> List.map
+                               |> List.map 
                                       (fun q -> fst q.Location + fst q.Size)
                                |> List.max)
                         Width(ql.Quests
@@ -165,15 +203,15 @@ let questLineView (model : Model) : ReactElement list =
           div [] (ql.Quests |> List.map showQuest) ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
-    div []
-        [ navBrand
-
-          Container.container []
-              [ Columns.columns []
-                    [ Column.column [ Column.Width(Screen.All, Column.Is3) ]
+    div [] 
+        [ navBrand model dispatch
+          
+          Container.container [] 
+              [ Columns.columns [] 
+                    [ Column.column [ Column.Width(Screen.All, Column.Is3) ] 
                           [ menu model dispatch ]
-
-                      Column.column [ Column.Width(Screen.All, Column.Is9) ]
+                      
+                      Column.column [ Column.Width(Screen.All, Column.Is9) ] 
                           [ div [] (questLineView model) ] ] ] ]
 #if DEBUG
 

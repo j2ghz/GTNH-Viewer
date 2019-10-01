@@ -23,10 +23,20 @@ let port =
     |> Option.map uint16
     |> Option.defaultValue 8085us
 
+let questSources = [
+    "BQv1 - 2.0.7.5", Parsers.BQv1.parser "./SampleData/DefaultQuests-2.0.7.5-cleaned.json"
+    "BQv3 - 2.0.7.6c-dev", Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned.json"
+]
+let parserBySourceId src =
+    questSources 
+    |> List.where (fst >> ((=) src)) 
+    |> List.exactlyOne |> snd
+
 let questApi : IQuestApi =
-    { quests = fun () -> async { return Parsers.BQv1.getQuests }
-      questLines = fun () -> async { return Parsers.BQv1.getQuestLines }
-      questLineById = fun id -> async { return Parsers.BQv1.getQuestLineById id } }
+    { sources = fun () -> async { return questSources |> List.map fst }
+      quests = fun src -> async { return (parserBySourceId src).getQuests }
+      questLines = fun src -> async { return (parserBySourceId src).getQuestLines }
+      questLineById = fun src id -> async { return (parserBySourceId src).getQuestLineById id } }
 
 let webApp =
     Remoting.createApi()

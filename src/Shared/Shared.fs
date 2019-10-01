@@ -39,7 +39,8 @@ type QuestLine = {
 /// to learn more, read the docs at https://zaid-ajaj.github.io/Fable.Remoting/src/basics.html
 type IQuestApi =
     { 
-        quests : unit -> Async<Quest list>
-        questLines : unit -> Async<QuestLineInfo list>
-        questLineById : int -> Async<QuestLine>
+        sources : unit -> Async<string list>
+        quests : string -> Async<Quest list>
+        questLines : string -> Async<QuestLineInfo list>
+        questLineById : string -> int -> Async<QuestLine>
     }
