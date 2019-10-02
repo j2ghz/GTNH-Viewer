@@ -32,7 +32,7 @@ RUN fake build --target bundle
 
 
 FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine as deploy
-COPY /deploy /
+COPY --from=build-env /app/deploy /
 WORKDIR /Server
 EXPOSE 8085
 ENTRYPOINT [ "dotnet", "Server.dll" ]
