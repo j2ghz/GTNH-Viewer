@@ -1,46 +1,37 @@
 namespace Shared
 
-type Counter = { Value : int }
+type Counter =
+    { Value : int }
 
 module Route =
-    /// Defines how routes are generated on server and mapped from client
-    let builder typeName methodName =
-        sprintf "/api/%s/%s" typeName methodName
+    let builder typeName methodName = sprintf "/api/%s/%s" typeName methodName
 
-type QuestLineInfo = {
-    Id : int
-    Name : string
-    Order : int
-    Description : string
-}
+type QuestLineInfo =
+    { Id : int
+      Name : string
+      Order : int
+      Description : string }
 
-type Quest = {
-    Id: int
-    Name: string
-    Description : string
-    Prerequisites : int list
-    Icon : string
-    Main : bool
-}
+type Quest =
+    { Id : int
+      Name : string
+      Description : string
+      Prerequisites : int list
+      Icon : string
+      Main : bool }
 
-type QuestLineQuest = {
-    Id : int
-    Location : int * int
-    Size : int * int
-    Quest : Quest
-}
+type QuestLineQuest =
+    { Id : int
+      Location : int * int
+      Size : int * int
+      Quest : Quest }
 
-type QuestLine = {
-    QuestLineInfo : QuestLineInfo
-    Quests : QuestLineQuest list
-}
+type QuestLine =
+    { QuestLineInfo : QuestLineInfo
+      Quests : QuestLineQuest list }
 
-/// A type that specifies the communication protocol between client and server
-/// to learn more, read the docs at https://zaid-ajaj.github.io/Fable.Remoting/src/basics.html
 type IQuestApi =
-    { 
-        sources : unit -> Async<string list>
-        quests : string -> Async<Quest list>
-        questLines : string -> Async<QuestLineInfo list>
-        questLineById : string -> int -> Async<QuestLine>
-    }
+    { sources : unit -> Async<string list>
+      quests : string -> Async<Quest list>
+      questLines : string -> Async<QuestLineInfo list>
+      questLineById : string -> int -> Async<QuestLine> }
