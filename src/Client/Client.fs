@@ -101,8 +101,7 @@ let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =
                       |> dispatch) ] [ ql.Name |> str ]
 
 let menu (model : Model) dispatch =
-    Menu.menu [] [ Menu.label [] [ model.SelectedQuestLine
-                                   |> Option.map (fun q -> q.QuestLineInfo.Name)
+    Menu.menu [] [ Menu.label [] [ model.SelectedSource
                                    |> (Option.defaultValue
                                            "Select a source on top")
                                    |> str ]
@@ -118,7 +117,7 @@ let qlInfo (ql : Shared.QuestLineInfo) =
         [ Hero.body []
               [ Container.container []
                     [ Heading.h1 [] [ str ql.Name ]
-                      Heading.h2 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
+                      Heading.h5 [ Heading.IsSubtitle ] [ str ql.Description ] ] ] ]
 
 let showPrerequisite pr =
     a [ pr
@@ -166,7 +165,7 @@ let showQuestLineQuest (qlq : QuestLineQuest) =
 let questLineView (model : Model) : ReactElement list =
     match model.SelectedQuestLine with
     | None ->
-        [ Hero.hero [ Hero.Color IsInfo ]
+        [ Hero.hero []
               [ Hero.body []
                     [ Container.container []
                           [ Heading.h1 []
