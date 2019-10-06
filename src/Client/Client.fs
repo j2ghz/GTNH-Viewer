@@ -31,15 +31,18 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     | m, SourceSelected s ->
         { m with SelectedSource = Some s
                  SelectedQuestLine = None },
-        Cmd.OfAsync.either Server.questAPI.questLines s QuestLinesLoaded Error
+        Cmd.batch [ Cmd.OfAsync.either Server.questAPI.questLines s
+                        QuestLinesLoaded Error
+                    s
+                    |> sprintf "#/s/%s"
+                    |> Navigation.newUrl ]
     | m, QuestLinesLoaded quests ->
         { m with QuestLines = Some quests }, Cmd.none
-    | m, QuestLineSelected i ->
-        let req =
-            Server.questAPI.questLineById
-                (m.SelectedSource |> Option.defaultValue "")
-        { m with SelectedQuestLine = None },
-        Cmd.OfAsync.either req i QuestLineReceived Error
+    | { Model.SelectedSource = Some s }, QuestLineSelected i ->
+        let req = Server.questAPI.questLineById s
+        { currentModel with SelectedQuestLine = None },
+        Cmd.batch [ Cmd.OfAsync.either req i QuestLineReceived Error
+                    sprintf "#/s/%s/ql/%i" s i |> Navigation.newUrl ]
     | m, QuestLineReceived ql ->
         { m with SelectedQuestLine = (Some ql) }, Cmd.none
     | _, Error e ->
@@ -52,8 +55,10 @@ let curry3 f x y z = f (x, y, z)
 let route =
     oneOf
         [ map Source (s "s" </> str)
-          map (curry SourceQuestLine) (s "sql" </> str </> i32)
-          map (curry3 SourceQuestLineQuest) (s "sqlq" </> str </> i32 </> i32) ]
+          map (curry SourceQuestLine) (s "s" </> str </> s "ql" </> i32)
+
+          map (curry3 SourceQuestLineQuest)
+              (s "s" </> str </> s "ql" </> i32 </> s "q" </> i32) ]
 
 let urlUpdate (result : Option<Route>) model : Model * Cmd<Msg> =
     match result with

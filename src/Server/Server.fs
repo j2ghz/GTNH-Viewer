@@ -25,10 +25,10 @@ let port =
     |> Option.defaultValue 8085us
 
 let questSources =
-    [ "BQv1 - 2.0.7.5",
+    [ "2.0.7.5",
       Parsers.BQv1.parser "./SampleData/DefaultQuests-2.0.7.5-cleaned.json"
 
-      "BQv3 - 2.0.7.6c-dev",
+      "2.0.7.6c-dev",
       Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned.json" ]
 
 let parserBySourceId src =
