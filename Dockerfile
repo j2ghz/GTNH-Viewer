@@ -24,15 +24,14 @@ RUN dotnet tool install paket -g
 ENV PATH="/root/.dotnet/tools:${PATH}"
 
 
-FROM build-env
+FROM build-env as build
 
 WORKDIR /app
 COPY . .
 RUN fake build --target bundle
 
-
 FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine as deploy
-COPY --from=build-env /app/deploy /
+COPY --from=build /app/deploy /
 WORKDIR /Server
 EXPOSE 8085
 ENTRYPOINT [ "dotnet", "Server.dll" ]
