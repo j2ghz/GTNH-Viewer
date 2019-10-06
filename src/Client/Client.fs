@@ -6,16 +6,22 @@ open Elmish.Navigation
 open Elmish.React
 open Elmish.UrlParser
 
-let init (route : Route option) : Model * Cmd<Msg> =
-    let initialModel =
-        { QuestSources = None
-          SelectedSource = None
-          QuestLines = None
-          SelectedQuestLine = None }
+let emptyModel =
+    { QuestSources = None
+      SelectedSource = None
+      QuestLines = None
+      SelectedQuestLine = None }
 
-    let loadCountCmd =
+let init =
+    let loadSources =
         Cmd.OfAsync.either Server.questAPI.sources () SourcesLoaded Error
-    initialModel, loadCountCmd
+    function
+    | Some(Source s) -> { emptyModel with SelectedSource = Some s }, loadSources
+    | Some(SourceQuestLine(s, ql)) ->
+        { emptyModel with SelectedSource = Some s }, loadSources
+    | Some(SourceQuestLineQuest(s, ql, q)) ->
+        { emptyModel with SelectedSource = Some s }, loadSources
+    | None -> emptyModel, loadSources
 
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
