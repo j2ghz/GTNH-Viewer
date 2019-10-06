@@ -6,7 +6,7 @@ open Elmish.Navigation
 open Elmish.React
 open Elmish.UrlParser
 
-let init() : Model * Cmd<Msg> =
+let init (route : Route option) : Model * Cmd<Msg> =
     let initialModel =
         { QuestSources = None
           SelectedSource = None
@@ -40,20 +40,16 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         printf "%O" e
         currentModel, Cmd.none
 
-type Route =
-    | Source of string
-    | SourceQuestLine of string * int
-    | SourceQuestLineQuest of string * int * int
-
 let curry f x y = f (x, y)
 let curry3 f x y z = f (x, y, z)
 
 let route =
-    oneOf [map Source (s "s" </> str)
-           map (curry SourceQuestLine) (s "sql" </> str </> i32)
-           map (curry3 SourceQuestLineQuest) (s "sqlq" </> str </> i32 </> i32)]
+    oneOf
+        [ map Source (s "s" </> str)
+          map (curry SourceQuestLine) (s "sql" </> str </> i32)
+          map (curry3 SourceQuestLineQuest) (s "sqlq" </> str </> i32 </> i32) ]
 
-let urlUpdate (result : Option<Route>) model =
+let urlUpdate (result : Option<Route>) model : Model * Cmd<Msg> =
     match result with
     | Some(Source s) ->
         { model with SelectedSource = Some s
@@ -66,7 +62,9 @@ let urlUpdate (result : Option<Route>) model =
                      SelectedQuestLine = None }, []
     | None -> (model, Navigation.modifyUrl "#")
 
+let routeParser : Parser<Route option> = parseHash route
+
 Program.mkProgram init update View.view
 |> Program.withReactBatched "elmish-app"
-|> Program.toNavigable (parseHash route) urlUpdate
+|> Program.toNavigable routeParser urlUpdate
 |> Program.run

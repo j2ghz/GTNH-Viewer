@@ -92,7 +92,7 @@ let showQuest (q : QuestLineQuest) =
 
           Card.content []
               [ Content.content []
-                    [ pre [ Style [ WhiteSpace "pre-wrap" ] ]
+                    [ pre [ Style [ WhiteSpaceOptions.PreWrap |> WhiteSpace ] ]
                           [ str q.Quest.Description ] ] ] ]
 
 let showQuestLineQuest (qlq : QuestLineQuest) =
@@ -125,7 +125,7 @@ let questLineView (model : Model) : ReactElement list =
                               |> List.map (fun q -> snd q.Location + snd q.Size)
                               |> List.max)
                         Position PositionOptions.Relative
-                        Overflow "auto" ]
+                        OverflowStyle OverflowOptions.Auto ]
                 Class "box" ] (ql.Quests |> List.map showQuestLineQuest)
           div [] (ql.Quests |> List.map showQuest) ]
 

@@ -1,4 +1,10 @@
 module Domain
+
+type Route =
+    | Source of string
+    | SourceQuestLine of string * int
+    | SourceQuestLineQuest of string * int * int
+
 type Model =
     { QuestSources : string list option
       SelectedSource : string option
