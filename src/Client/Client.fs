@@ -62,9 +62,23 @@ let urlUpdate (result : Option<Route>) model : Model * Cmd<Msg> =
                      SelectedQuestLine = None }, []
     | None -> (model, Navigation.modifyUrl "#")
 
-let routeParser : Parser<Route option> = parseHash route
+//#if DEBUG for debugging
+
+#if DEBUG
+open Elmish.Debug
+open Elmish.HMR
+#endif
+
 
 Program.mkProgram init update View.view
+#if DEBUG
+|> Program.withConsoleTrace
+#endif
+
 |> Program.withReactBatched "elmish-app"
-|> Program.toNavigable routeParser urlUpdate
+|> Program.toNavigable (parseHash route) urlUpdate
+#if DEBUG
+|> Program.withDebugger
+#endif
+
 |> Program.run
