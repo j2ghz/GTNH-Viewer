@@ -5,16 +5,23 @@ type Route =
     | SourceQuestLine of string * int
     | SourceQuestLineQuest of string * int * int
 
-type Model =
-    { QuestSources : string list option
-      SelectedSource : string option
-      QuestLines : Shared.QuestLineInfo list option
+type Quests =
+    { QuestLines : Shared.QuestLineInfo list option
       SelectedQuestLine : Shared.QuestLine option }
+
+type Source =
+    | Quests of Quests
+    | Recipes
+
+type Model =
+    { CurrentRoute : Route option
+      QuestSources : string list option }
 
 type Msg =
     | QuestLineSelected of int
     | SourcesLoaded of string list
-    | SourceSelected of string
+    //    | SourceSelected of string
     | QuestLineReceived of Shared.QuestLine
     | QuestLinesLoaded of Shared.QuestLineInfo list
+    | NavigateTo of Route
     | Error of exn

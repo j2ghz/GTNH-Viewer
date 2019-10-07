@@ -18,12 +18,10 @@ let stri = sprintf "%i" >> str
 let navSource (model : Model) (dispatch : Msg -> unit) source =
     Navbar.Item.a [ Navbar.Item.Props [ OnClick(fun _ ->
                                             source
-                                            |> SourceSelected
-                                            |> dispatch) ]
-                    (model.SelectedSource
-                     |> Option.defaultValue ""
-                     |> (=) source
-                     |> Navbar.Item.IsActive) ] [ str source ]
+                                            |> Source
+                                            |> NavigateTo
+                                            |> dispatch) ] ] [ //(model.SelectedSource |> Option.defaultValue "" |> (=) source |> Navbar.Item.IsActive)
+                                                               str source ]
 
 let navBrand (model : Model) (dispatch : Msg -> unit) =
     Navbar.navbar [ Navbar.Color IsWhite ]
@@ -46,11 +44,9 @@ let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =
                       |> dispatch) ] [ ql.Name |> str ]
 
 let menu (model : Model) dispatch =
-    Menu.menu [] [ Menu.label [] [ model.SelectedSource
-                                   |> (Option.defaultValue
-                                           "Select a source on top")
-                                   |> str ]
-                   (match model.QuestLines with
+    Menu.menu [] [ Menu.label [] []
+                   (//model.SelectedSource |> (Option.defaultValue "Select a source on top") |> str
+                    match None with //model.QuestLines with
                     | None -> Menu.label [] []
                     | Some ql ->
                         Menu.list [] (ql
@@ -108,7 +104,7 @@ let showQuestLineQuest (qlq : QuestLineQuest) =
                                   Background "#000" ] ] [] ]
 
 let questLineView (model : Model) : ReactElement list =
-    match model.SelectedQuestLine with
+    match None with //model.SelectedQuestLine with
     | None ->
         [ Hero.hero []
               [ Hero.body []
