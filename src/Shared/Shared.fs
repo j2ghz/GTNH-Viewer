@@ -1,10 +1,15 @@
 namespace Shared
 
-type Counter =
-    { Value : int }
+type Remote<'a> =
+    | Empty
+    | Loading
+    | LoadError of string
+    | Body of 'a
 
 module Route =
     let builder typeName methodName = sprintf "/api/%s/%s" typeName methodName
+
+type Source = string
 
 type QuestLineInfo =
     { Id : int

@@ -1,6 +1,6 @@
 module Client
 
-open Domain
+open Types
 open Elmish
 open Elmish.Navigation
 open Elmish.React
