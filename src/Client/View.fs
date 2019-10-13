@@ -33,8 +33,8 @@ let navBrand (model : Model) (dispatch : Msg -> unit) =
                 Navbar.menu []
                     [ Navbar.Start.div []
                           (match model.QuestSources with
-                           | None -> []
-                           | Some sources ->
+                           | Remote.Empty -> []
+                           | Body sources ->
                                sources |> List.map (navSource model dispatch)) ] ] ]
 
 let showQuestLine (dispatch : Msg -> unit) (ql : QuestLineInfo) =

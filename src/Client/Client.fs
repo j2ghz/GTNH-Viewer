@@ -12,7 +12,7 @@ let urlUpdate (result : Option<Route>) model : Model * Cmd<Msg> =
     | None -> (model, Navigation.modifyUrl "#")
 
 let emptyModel =
-    { QuestSources = None
+    { QuestSources = Empty
       CurrentRoute = None }
 
 let init route =
@@ -37,7 +37,7 @@ let toHash = function
 
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
-    | m, SourcesLoaded s -> { m with QuestSources = Some s }, Cmd.none
+    | m, SourcesLoaded s -> { m with QuestSources = Body s }, Cmd.none
     // | m, SourceSelected s ->
     //     { m with SelectedSource = Some s
     //              SelectedQuestLine = None },
