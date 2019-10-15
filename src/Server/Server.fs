@@ -26,10 +26,13 @@ let port =
 
 let questSources =
     [ "2.0.7.5",
-      Parsers.BQv1.parser "./SampleData/DefaultQuests-2.0.7.5-cleaned.json"
+      Parsers.BQv1.parser "./SampleData/DefaultQuests-2.0.7.5-cleaned-minified.json"
 
       "2.0.7.6c-dev",
-      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned.json" ]
+      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned-minified.json"
+
+      "2.0.7.6d-dev",
+      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6d-dev-cleaned-minified.json" ]
 
 let parserBySourceId src =
     questSources

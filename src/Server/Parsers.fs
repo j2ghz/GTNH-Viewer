@@ -10,7 +10,7 @@ type IQuestParser =
 module BQv3 =
     open Shared
 
-    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned.json">
+    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned-minified.json">
 
     let mapQuestLine id (ql : BetterQuestingDB.QuestLine) =
         { Id = ql.LineId
@@ -65,7 +65,7 @@ module BQv3 =
 module BQv1 =
     open Shared
 
-    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.5-cleaned.json">
+    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.5-cleaned-minified.json">
 
     let mapQuestLine id (ql : BetterQuestingDB.QuestLine) =
         { Id = id
