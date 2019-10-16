@@ -16,13 +16,13 @@ open Elmish.HMR
 #endif
 
 
-Program.mkProgram (fun _ -> Types.Page.Home |> State.init ) State.update View.view
+Program.mkProgram State.init State.update View.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
 
 |> Program.withReactBatched "elmish-app"
-//|> Program.toNavigable State.route urlUpdate
+|> Program.toNavigable State.a State.urlUpdate
 #if DEBUG
 |> Program.withDebugger
 #endif

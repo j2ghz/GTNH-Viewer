@@ -2,6 +2,7 @@ module Quests.Types
 open Shared
 
 type Page =
+    | Home
     | SelectedSource of source : Source
 
 type Msg =
