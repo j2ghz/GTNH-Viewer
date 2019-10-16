@@ -14,14 +14,14 @@ open Shared
 open Thoth.Json
 
 
-let view (model : AppModel) (dispatch : Msg -> unit) =
+let view (model : AppModel) (dispatch : AppMsg -> unit) =
     div []
         [
 
           Container.container []
               [ Columns.columns []
                     [ Column.column [ Column.Width(Screen.All, Column.Is3) ]
-                          [ ]
+                          [ model.CurrentPage |> sprintf "You are at %A" |> str ]
 
                       Column.column [ Column.Width(Screen.All, Column.Is9) ]
-                          [ div [] [] ] ] ] ]
+                          [ div [] [ model |> sprintf "%A" |> str] ] ] ] ]
