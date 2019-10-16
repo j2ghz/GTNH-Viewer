@@ -33,5 +33,3 @@ let update (msg : AppMsg) (state : AppModel) : AppModel * Cmd<AppMsg> =
         Cmd.map QuestsMsg questsCmd
     | NavigateTo r ->
         failwith "needed?"
-    | UrlUpdated r ->
-        failwith "needed?"

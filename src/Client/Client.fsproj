@@ -9,11 +9,12 @@
     <Compile Include="../Shared/Shared.fs" />
     <Compile Include="Version.fs" />
     <Compile Include="Quests/Types.fs" />
-    <Compile Include="Quests\State.fs" />
+    <Compile Include="Quests/State.fs" />
+    <Compile Include="Quests/View.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Server.fs" />
-    <Compile Include="View.fs" />
     <Compile Include="State.fs" />
+    <Compile Include="View.fs" />
     <Compile Include="Client.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

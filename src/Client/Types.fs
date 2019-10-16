@@ -19,5 +19,4 @@ type AppMsg =
     | QuestsMsg of Quests.Types.Msg
     //App messages
     //Navigation
-    | UrlUpdated of Page
     | NavigateTo of Page
