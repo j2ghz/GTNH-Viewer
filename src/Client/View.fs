@@ -29,32 +29,51 @@ let navSource (model: AppModel) (dispatch: AppMsg -> unit) source =
            |> (=) page
            |> Navbar.Item.IsActive) ] [ str source ]
 
+// (match model.Quests.Sources with
+//  | Empty -> [ Navbar.Item.a [] [ str "Not requested" ] ]
+//  | Loading -> [ Navbar.Item.a [] [ str "Loading" ] ]
+//  | LoadError s -> [ Navbar.Item.a [] [ str <| sprintf "Error: %s" s ] ]
+//  | Body sources -> sources |> List.map (navSource model dispatch))
+
+let navbarItem currentPage name link =
+    Navbar.Item.a
+        [ currentPage
+          |> Option.defaultValue Home
+          |> (=) link
+          |> Navbar.Item.IsActive
+          Navbar.Item.Props [ Href <| (State.pageHash link) ] ] [ str name ]
+
 let navBrand (model: AppModel) (dispatch: AppMsg -> unit) =
-    Navbar.navbar [ Navbar.Color IsWhite ]
+    let expanded = true //Model?
+    Navbar.navbar []
         [ Container.container []
               [ Navbar.Brand.div []
                     [ Navbar.Item.a
                         [ Navbar.Item.CustomClass "brand-text"
-                          Navbar.Item.Props <| [ Href <| State.pageHash Page.Home ] ] [ str "SAFE Admin" ] ]
+                          Navbar.Item.Props <| [ Href <| State.pageHash Page.Home ] ] [ str "GTNH-Viewer" ]
+                      Navbar.burger [ if expanded then yield CustomClass "is-active" ]
+                          [ span [] []
+                            span [] []
+                            span [] [] ] ]
 
-                Navbar.menu []
+                Navbar.menu [ Navbar.Menu.IsActive expanded ]
                     [ Navbar.Start.div []
-                          (match model.Quests.Sources with
-                           | Empty -> [ Navbar.Item.a [] [ str "Not requested" ] ]
-                           | Loading -> [ Navbar.Item.a [] [ str "Loading" ] ]
-                           | LoadError s -> [ Navbar.Item.a [] [ str <| sprintf "Error: %s" s ] ]
-                           | Body sources -> sources |> List.map (navSource model dispatch)) ] ] ]
+                          [ navbarItem model.CurrentPage "Quests" (Page.Quests Quests.Types.Page.Home)
+                            navbarItem model.CurrentPage "Recipes" (Page.Recipes) ] ] ] ]
 
 let view (model: AppModel) (dispatch: AppMsg -> unit) =
     div []
         [ navBrand model dispatch
           Container.container []
               [ Columns.columns []
-                    [ Column.column [ Column.Width(Screen.All, Column.Is3) ] [ sprintf "State: %A" model |> str ]
+                    [ Column.column [ Column.Width(Screen.All, Column.Is3) ] []
 
                       Column.column [ Column.Width(Screen.All, Column.Is9) ]
                           (match model.CurrentPage with
                            | None -> [ str "404" ]
                            | Some Home -> [ str "You are home!" ]
                            | Some Recipes -> [ str "Recipes WIP!" ]
-                           | Some(Quests _) -> [ Quests.View.view model.Quests (QuestsMsg >> dispatch) ]) ] ] ]
+                           | Some(Quests _) -> [ Quests.View.view model.Quests (QuestsMsg >> dispatch) ]) ] ]
+          Footer.footer []
+              [ Content.content [ Content.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]
+                    [ sprintf "State: %A" model |> str ] ] ]
