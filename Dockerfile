@@ -14,21 +14,11 @@ RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install fake
-RUN dotnet tool install fake-cli -g
-
-# Install Paket
-RUN dotnet tool install paket -g
-
-# add dotnet tools to path to pick up fake and paket installation
-ENV PATH="/root/.dotnet/tools:${PATH}"
-
-
 FROM build-env as build
 
 WORKDIR /app
 COPY . .
-RUN fake build --target bundle
+RUN dotnet fake build --target bundle
 
 FROM microsoft/dotnet:3.0-aspnetcore-runtime-alpine as deploy
 COPY --from=build /app/deploy /
