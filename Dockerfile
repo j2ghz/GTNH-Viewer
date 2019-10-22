@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 as build-env
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 as build-env
 
 # Add keys and sources lists
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash
@@ -30,7 +30,7 @@ WORKDIR /app
 COPY . .
 RUN fake build --target bundle
 
-FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine as deploy
+FROM microsoft/dotnet:3.0-aspnetcore-runtime-alpine as deploy
 COPY --from=build /app/deploy /
 WORKDIR /Server
 EXPOSE 8085
