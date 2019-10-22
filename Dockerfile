@@ -21,7 +21,7 @@ COPY . .
 RUN dotnet tool restore
 RUN dotnet fake build --target bundle
 
-FROM microsoft/dotnet:3.0-aspnetcore-runtime-alpine as deploy
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine as deploy
 COPY --from=build /app/deploy /
 WORKDIR /Server
 EXPOSE 8085
