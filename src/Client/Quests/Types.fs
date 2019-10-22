@@ -13,5 +13,4 @@ type Msg =
     | LoadQuestLines of Source
 
 type State =
-    { Sources: Shared.Source list Remote
-      Source: Source option }
+    { Sources: Shared.Source list Remote }

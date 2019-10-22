@@ -71,9 +71,17 @@ let view (model: AppModel) (dispatch: AppMsg -> unit) =
                       Column.column [ Column.Width(Screen.All, Column.Is9) ]
                           (match model.CurrentPage with
                            | None -> [ str "404" ]
-                           | Some Home -> [ str "You are home!" ]
+                           | Some Home ->
+                               [ Hero.hero []
+                                     [ Hero.body []
+                                           [ Container.container [ Container.IsFluid ]
+                                                 [ Heading.h1 [] [ str "Welcome to GTNH-Viewer" ]
+                                                   Heading.h2 [ Heading.IsSubtitle ]
+                                                       [ str
+                                                           "Use the navbar on top and menu on the left to explore the site and find the info you need" ] ] ] ] ]
                            | Some Recipes -> [ str "Recipes WIP!" ]
                            | Some(Quests _) -> [ Quests.View.view model.Quests (QuestsMsg >> dispatch) ]) ] ]
           Footer.footer []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]
-                    [ sprintf "State: %A" model |> str ] ] ]
+                    [ h6 [] [ str "Site debug info:" ]
+                      p [] [ sprintf "State: %A" model |> str ] ] ] ]
