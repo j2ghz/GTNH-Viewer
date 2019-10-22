@@ -1,14 +1,22 @@
 module Quests.State
+
 open Quests.Types
 open Shared
 open Elmish
 
 let init route =
-    let source = match route with
-                    | Some (SelectedSource s) -> Some s
-                    | None -> None
-    {Source = source
-     Sources = Shared.Remote.Empty}, Cmd.Empty
+    let source =
+        match route with
+        | Some(SelectedSource s) -> Some s
+        | None -> None
+    { Source = source
+      Sources = Shared.Remote.Empty }, Cmd.ofMsg LoadSources
 
-let update model = function
-    | LoadSources -> { model with Sources = Loading }, Cmd.Empty
+let update model =
+    function
+    | LoadSources ->
+        { model with Sources = Loading },
+        Cmd.OfAsync.either Server.questAPI.sources () SourcesLoaded SourcesLoadingError
+    | SourcesLoaded s -> { model with Sources = Body s }, Cmd.Empty
+    | SourcesLoadingError e -> { model with Sources = LoadError <| sprintf "%A" e }, Cmd.Empty
+    | LoadQuestLines _ -> failwith "NotImplementedException"

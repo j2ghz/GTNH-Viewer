@@ -12,31 +12,31 @@ module Route =
 type Source = string
 
 type QuestLineInfo =
-    { Id : int
-      Name : string
-      Order : int
-      Description : string }
+    { Id: int
+      Name: string
+      Order: int
+      Description: string }
 
 type Quest =
-    { Id : int
-      Name : string
-      Description : string
-      Prerequisites : int list
-      Icon : string
-      Main : bool }
+    { Id: int
+      Name: string
+      Description: string
+      Prerequisites: int list
+      Icon: string
+      Main: bool }
 
 type QuestLineQuest =
-    { Id : int
-      Location : int * int
-      Size : int * int
-      Quest : Quest }
+    { Id: int
+      Location: int * int
+      Size: int * int
+      Quest: Quest }
 
 type QuestLine =
-    { QuestLineInfo : QuestLineInfo
-      Quests : QuestLineQuest list }
+    { QuestLineInfo: QuestLineInfo
+      Quests: QuestLineQuest list }
 
 type IQuestApi =
-    { sources : unit -> Async<string list>
-      quests : string -> Async<Quest list>
-      questLines : string -> Async<QuestLineInfo list>
-      questLineById : string -> int -> Async<QuestLine> }
+    { sources: unit -> Async<Source list>
+      quests: string -> Async<Quest list>
+      questLines: string -> Async<QuestLineInfo list>
+      questLineById: string -> int -> Async<QuestLine> }

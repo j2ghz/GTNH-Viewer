@@ -1,21 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="index.html" />
-    <None Include="paket.references" />
-    <None Include="style.scss" />
-    <Compile Include="../Shared/Shared.fs" />
-    <Compile Include="Version.fs" />
-    <Compile Include="Quests/Types.fs" />
-    <Compile Include="Quests/State.fs" />
-    <Compile Include="Quests/View.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="Server.fs" />
-    <Compile Include="State.fs" />
-    <Compile Include="View.fs" />
-    <Compile Include="Client.fs" />
-  </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="index.html" />
+        <None Include="paket.references" />
+        <None Include="style.scss" />
+        <Compile Include="../Shared/Shared.fs" />
+        <Compile Include="Server.fs" />
+        <Compile Include="Version.fs" />
+        <!--Components-->
+        <Compile Include="Quests/Types.fs" />
+        <Compile Include="Quests/State.fs" />
+        <Compile Include="Quests/View.fs" />
+        <!--App-->
+        <Compile Include="Types.fs" />
+        <Compile Include="State.fs" />
+        <Compile Include="View.fs" />
+        <Compile Include="Client.fs" />
+    </ItemGroup>
+    <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
