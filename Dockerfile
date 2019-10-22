@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 as build-env
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 as build-env
 
 # Add keys and sources lists
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash
@@ -14,23 +14,14 @@ RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install fake
-RUN dotnet tool install fake-cli -g
-
-# Install Paket
-RUN dotnet tool install paket -g
-
-# add dotnet tools to path to pick up fake and paket installation
-ENV PATH="/root/.dotnet/tools:${PATH}"
-
-
 FROM build-env as build
 
 WORKDIR /app
 COPY . .
-RUN fake build --target bundle
+RUN dotnet tool restore
+RUN dotnet fake build --target bundle
 
-FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine as deploy
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine as deploy
 COPY --from=build /app/deploy /
 WORKDIR /Server
 EXPOSE 8085
