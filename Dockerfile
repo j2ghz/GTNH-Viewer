@@ -18,6 +18,7 @@ FROM build-env as build
 
 WORKDIR /app
 COPY . .
+RUN dotnet tool restore
 RUN dotnet fake build --target bundle
 
 FROM microsoft/dotnet:3.0-aspnetcore-runtime-alpine as deploy
