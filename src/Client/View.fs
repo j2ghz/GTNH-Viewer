@@ -58,7 +58,8 @@ let navBrand (model: AppModel) (dispatch: AppMsg -> unit) =
 
                 Navbar.menu [ Navbar.Menu.IsActive expanded ]
                     [ Navbar.Start.div []
-                          [ navbarItem model.CurrentPage "Quests" (Page.Quests Quests.Types.Page.Home)
+                          [ yield! Quests.View.navbarItem model.Quests model.CurrentPage
+                                       (Types.Page.Quests >> State.pageHash)
                             navbarItem model.CurrentPage "Recipes" (Page.Recipes) ] ] ] ]
 
 let view (model: AppModel) (dispatch: AppMsg -> unit) =

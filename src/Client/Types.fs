@@ -8,11 +8,10 @@ type Page =
     | Recipes // of Recipes.Types.Page
 
 type AppModel =
-    {
-      //App's own state
-      CurrentPage : Option<Page>
+    { //App's own state
+      CurrentPage: Option<Page>
       //Children states
-      Quests : Quests.Types.State }
+      Quests: Quests.Types.State }
 
 type AppMsg =
     //Children messages

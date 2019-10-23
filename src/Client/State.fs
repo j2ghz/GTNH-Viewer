@@ -7,9 +7,12 @@ open Elmish.Navigation
 
 let pageHash =
     function
-    | Types.Page.Home -> "#/Home"
-    | Types.Page.Quests _ -> "#/Quests"
-    | Types.Page.Recipes -> "#/Recipes"
+    | Home -> "#/Home"
+    | Quests q ->
+        match q with
+        | Quests.Types.Page.Home -> "#/Quests"
+        | Quests.Types.Page.SelectedSource s -> sprintf "#/Quests/%s" s
+    | Recipes -> "#/Recipes"
 
 let urlUpdate (result: Page option) model: AppModel * Cmd<AppMsg> =
     match result with
@@ -37,7 +40,8 @@ let route state =
     oneOf
         [ map Home (s "Home")
           map Recipes (s "Recipes")
-          map (Quests Quests.Types.Page.Home) (s "Quests") ] state
+          map (Quests Quests.Types.Page.Home) (s "Quests")
+          map (Quests << Quests.Types.Page.SelectedSource) (s "Quests" </> str) ] state
 
 let a loc = parseHash route loc
 
