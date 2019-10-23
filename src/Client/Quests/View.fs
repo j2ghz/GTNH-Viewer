@@ -5,24 +5,26 @@ open Fable.React.Helpers
 open Fulma
 open Shared
 
+let navbarSource urlResolver s =
+    Navbar.Item.a
+        [ Navbar.Item.Props
+            [ s
+              |> Types.Page.SelectedSource
+              |> urlResolver
+              |> Fable.React.Props.Href ] ] [ str s ]
+
 let navbarItem (model: Types.State) currentPage urlResolver =
     match model.Sources with
     | Empty
     | Loading -> [ Navbar.Item.a [] [ str "Quests" ] ]
     | LoadError e ->
-        [ Navbar.Item.a [ Navbar.Item.HasDropdown; Navbar.Item.IsHoverable ]
+        [ Navbar.Item.div [ Navbar.Item.HasDropdown; Navbar.Item.IsHoverable ]
               [ Navbar.Link.a [] [ str "Quests" ]
                 Navbar.Dropdown.div [] [ str e ] ] ]
     | Body sources ->
-        [ Navbar.Item.a [ Navbar.Item.HasDropdown; Navbar.Item.IsHoverable ]
+        [ Navbar.Item.div [ Navbar.Item.HasDropdown; Navbar.Item.IsHoverable ]
               [ Navbar.Link.a [] [ str "Quests" ]
-                Navbar.Dropdown.div []
-                    (sources
-                     |> List.map (fun s ->
-                         Navbar.Item.a
-                             [ Navbar.Item.Props <| [ Fable.React.Props.Href(s
-                                                                             |> Types.Page.SelectedSource
-                                                                             |> urlResolver) ] ] [ str s ])) ] ]
+                Navbar.Dropdown.div [] (sources |> List.map (navbarSource urlResolver)) ] ]
 
 let view (model: Types.State) (dispatch: Types.Msg -> unit) =
     [ Columns.columns []
