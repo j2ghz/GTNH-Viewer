@@ -26,14 +26,20 @@ let navbarItem (model: Types.State) currentPage urlResolver =
               [ Navbar.Link.a [] [ str "Quests" ]
                 Navbar.Dropdown.div [] (sources |> List.map (navbarSource urlResolver)) ] ]
 
-let view (model: Types.State) (dispatch: Types.Msg -> unit) =
+let view (currentPage: Types.Page) (model: Types.State) (dispatch: Types.Msg -> unit) =
     [ Columns.columns []
           [ Column.column [ Column.Width(Screen.All, Column.Is3) ]
                 [ Menu.menu []
-                      [ Menu.label [] [ str "Placeholder" ]
-                        Menu.list []
-                            [ Menu.Item.li [] [ str "Test" ]
-                              Menu.Item.li [] [ str "Test" ] ] ] ]
+                      (match currentPage with
+                       | Types.Page.Home -> [ Menu.label [] [ str "Select a source" ] ]
+                       | Types.Page.SelectedSource s ->
+                           [ Menu.label [] [ str s ]
+                             Menu.list []
+                                 (match model.QuestLines with
+                                  | Empty -> [ Menu.Item.li [] [ str "Empty" ] ]
+                                  | Loading -> [ Menu.Item.li [] [ str "Loading" ] ]
+                                  | LoadError e -> [ Menu.Item.li [] [ str e ] ]
+                                  | Body qlis -> qlis |> List.map (fun qli -> Menu.Item.li [] [ str qli.Name ])) ]) ]
             Column.column [ Column.Width(Screen.All, Column.Is9) ]
                 [ h2 [] [ str "Quests" ]
                   p []

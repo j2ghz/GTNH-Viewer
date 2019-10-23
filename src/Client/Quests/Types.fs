@@ -15,4 +15,5 @@ type Msg =
     | LoadQuestLinesError of exn
 
 type State =
-    { Sources: Shared.Source list Remote }
+    { Sources: Shared.Source list Remote
+      QuestLines: Shared.QuestLineInfo list Remote }

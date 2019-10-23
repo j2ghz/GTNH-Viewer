@@ -4,7 +4,9 @@ open Quests.Types
 open Shared
 open Elmish
 
-let init route = { Sources = Shared.Remote.Empty }, Cmd.ofMsg LoadSources
+let init route =
+    { Sources = Shared.Remote.Empty
+      QuestLines = Empty }, Cmd.ofMsg LoadSources
 
 let update model =
     function
