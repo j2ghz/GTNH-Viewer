@@ -10,7 +10,7 @@ let update model =
     function
     | LoadSources ->
         { model with Sources = Loading },
-        Cmd.OfAsync.either Server.questAPI.sources () SourcesLoaded SourcesLoadingError
-    | SourcesLoaded s -> { model with Sources = Body s }, Cmd.Empty
-    | SourcesLoadingError e -> { model with Sources = LoadError <| sprintf "%A" e }, Cmd.Empty
+        Cmd.OfAsync.either Server.questAPI.sources () LoadSourcesFinished LoadSourcesError
+    | LoadSourcesFinished s -> { model with Sources = Body s }, Cmd.Empty
+    | LoadSourcesError e -> { model with Sources = LoadError <| sprintf "%A" e }, Cmd.Empty
     | LoadQuestLines _ -> failwith "NotImplementedException"

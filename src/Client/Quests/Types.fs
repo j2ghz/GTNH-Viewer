@@ -8,9 +8,11 @@ type Page =
 
 type Msg =
     | LoadSources
-    | SourcesLoaded of Source list
-    | SourcesLoadingError of exn
+    | LoadSourcesFinished of Source list
+    | LoadSourcesError of exn
     | LoadQuestLines of Source
+    | LoadQuestLinesFinished of Shared.QuestLineInfo list
+    | LoadQuestLinesError of exn
 
 type State =
     { Sources: Shared.Source list Remote }
