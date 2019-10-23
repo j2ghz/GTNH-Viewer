@@ -11,8 +11,8 @@ jobs:
         steps:
             - uses: actions/checkout@v1
             - name: Build the Docker image
-              run: docker build . --file Dockerfile --tag j2ghz/gtnh-viewer:$(date +%s)
+              run: docker build . --file Dockerfile --tag j2ghz/gtnh-viewer
             - name: Tag image
-              run: docker tag j2ghz/gtnh-viewer:$(date +%s) docker.pkg.github.com/j2ghz/gtnh-viewer/master:$(date +%s)
+              run: docker tag j2ghz/gtnh-viewer docker.pkg.github.com/j2ghz/gtnh-viewer/master
             - name: Push image
-              run: docker push docker.pkg.github.com/j2ghz/gtnh-viewer/master:$(date +%s)
+              run: docker push docker.pkg.github.com/j2ghz/gtnh-viewer/master
