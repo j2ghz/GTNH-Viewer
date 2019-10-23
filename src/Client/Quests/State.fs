@@ -37,6 +37,8 @@ let update model =
               QuestLines =
                   sprintf "Error while loading QuestLines:\n%A" e
                   |> LoadError }, Cmd.Empty
-    | LoadQuestLine(_, _) -> failwith "Not Implemented"
-    | LoadQuestLineFinished(_) -> failwith "Not Implemented"
+    | LoadQuestLine(s, i) ->
+        { model with QuestLine = Loading },
+        Cmd.OfAsync.either (Server.questAPI.questLineById s) i LoadQuestLineFinished LoadQuestLineError
+    | LoadQuestLineFinished qli -> { model with QuestLine = Body qli }, Cmd.Empty
     | LoadQuestLineError(_) -> failwith "Not Implemented"
