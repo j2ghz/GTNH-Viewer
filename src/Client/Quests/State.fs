@@ -19,4 +19,6 @@ let update model =
                 do! Async.Sleep 5000
                 return! Server.questAPI.sources()
             }) () LoadSourcesFinished LoadSourcesError
-    | LoadQuestLines _ -> failwith "NotImplementedException"
+    | LoadQuestLines(_) -> failwith "Not Implemented"
+    | LoadQuestLinesFinished(_) -> failwith "Not Implemented"
+    | LoadQuestLinesError(_) -> failwith "Not Implemented"
