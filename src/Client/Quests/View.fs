@@ -42,7 +42,4 @@ let view (currentPage: Types.Page) (model: Types.State) (dispatch: Types.Msg -> 
                                   | Body qlis -> qlis |> List.map (fun qli -> Menu.Item.li [] [ str qli.Name ])) ]) ]
             Column.column [ Column.Width(Screen.All, Column.Is9) ]
                 [ h2 [] [ str "Quests" ]
-                  p []
-                      [ model
-                        |> sprintf "Model: %A"
-                        |> str ] ] ] ]
+                  p [] [ "Placeholder" |> str ] ] ] ]

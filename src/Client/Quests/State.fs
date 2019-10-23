@@ -8,6 +8,11 @@ let init route =
     { Sources = Shared.Remote.Empty
       QuestLines = Empty }, Cmd.ofMsg LoadSources
 
+let urlUpdate page =
+    match page with
+    | Home -> Cmd.Empty
+    | SelectedSource s -> Cmd.ofMsg (LoadQuestLines s)
+
 let update model =
     function
     | LoadSources ->
@@ -21,6 +26,12 @@ let update model =
                 do! Async.Sleep 5000
                 return! Server.questAPI.sources()
             }) () LoadSourcesFinished LoadSourcesError
-    | LoadQuestLines(_) -> failwith "Not Implemented"
-    | LoadQuestLinesFinished(_) -> failwith "Not Implemented"
-    | LoadQuestLinesError(_) -> failwith "Not Implemented"
+    | LoadQuestLines s ->
+        { model with QuestLines = Loading },
+        Cmd.OfAsync.either Server.questAPI.questLines s LoadQuestLinesFinished LoadQuestLinesError
+    | LoadQuestLinesFinished qlis -> { model with QuestLines = Body qlis }, Cmd.Empty
+    | LoadQuestLinesError e ->
+        { model with
+              QuestLines =
+                  sprintf "Error while loading QuestLines:\n%A" e
+                  |> LoadError }, Cmd.Empty

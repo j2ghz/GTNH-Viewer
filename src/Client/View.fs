@@ -81,5 +81,10 @@ let view (model: AppModel) (dispatch: AppMsg -> unit) =
                | Some(Quests q) -> Quests.View.view q model.Quests (QuestsMsg >> dispatch))
           Footer.footer []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]
-                    [ h6 [] [ str "Site debug info:" ]
-                      p [] [ sprintf "State: %A" model |> str ] ] ] ]
+                    [ p []
+                          [ a [ Href "https://github.com/j2ghz/GTNH-Viewer" ] [ str "GTNH-Viewer" ]
+                            str " by "
+                            a [ Href "https://github.com/j2ghz" ] [ str "J2ghz" ]
+                            str ". Licensed under "
+                            a [ Href "https://github.com/j2ghz/GTNH-Viewer/blob/master/LICENSE" ]
+                                [ str "GNU AGPL v3.0" ] ] ] ] ]

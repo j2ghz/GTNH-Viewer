@@ -16,6 +16,9 @@ let pageHash =
 
 let urlUpdate (result: Page option) model: AppModel * Cmd<AppMsg> =
     match result with
+    | Some(Quests p) ->
+        let qCmd = Quests.State.urlUpdate p
+        { model with CurrentPage = result }, Cmd.map QuestsMsg qCmd
     | Some p -> { model with CurrentPage = Some p }, Cmd.Empty
     | None -> (model, Cmd.ofMsg <| NavigateTo Home)
 
