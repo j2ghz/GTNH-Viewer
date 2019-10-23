@@ -12,5 +12,11 @@ let update model =
         { model with Sources = Loading },
         Cmd.OfAsync.either Server.questAPI.sources () LoadSourcesFinished LoadSourcesError
     | LoadSourcesFinished s -> { model with Sources = Body s }, Cmd.Empty
-    | LoadSourcesError e -> { model with Sources = LoadError <| sprintf "%A" e }, Cmd.Empty
+    | LoadSourcesError e ->
+        { model with Sources = LoadError <| sprintf "%A" e },
+        Cmd.OfAsync.either (fun _ ->
+            async {
+                do! Async.Sleep 5000
+                return! Server.questAPI.sources()
+            }) () LoadSourcesFinished LoadSourcesError
     | LoadQuestLines _ -> failwith "NotImplementedException"
