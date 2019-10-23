@@ -78,7 +78,7 @@ let view (model: AppModel) (dispatch: AppMsg -> unit) =
                                            [ str
                                                "Use the navbar on top and menu on the left to explore the site and find the info you need" ] ] ] ] ]
                | Some Recipes -> [ str "Recipes WIP!" ]
-               | Some(Quests q) -> Quests.View.view q model.Quests (QuestsMsg >> dispatch))
+               | Some(Quests q) -> Quests.View.view q (Quests >> State.pageHash) model.Quests (QuestsMsg >> dispatch))
           Footer.footer []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]
                     [ p []

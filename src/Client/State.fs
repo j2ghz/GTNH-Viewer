@@ -12,6 +12,7 @@ let pageHash =
         match q with
         | Quests.Types.Page.Home -> "#/Quests"
         | Quests.Types.Page.SelectedSource s -> sprintf "#/Quests/%s" s
+        | Quests.Types.Page.QuestLine(s, qli) -> sprintf "#/Quests/%s/%i" s qli
     | Recipes -> "#/Recipes"
 
 let urlUpdate (result: Page option) model: AppModel * Cmd<AppMsg> =
@@ -44,7 +45,8 @@ let route state =
         [ map Home (s "Home")
           map Recipes (s "Recipes")
           map (Quests Quests.Types.Page.Home) (s "Quests")
-          map (Quests << Quests.Types.Page.SelectedSource) (s "Quests" </> str) ] state
+          map (Quests << Quests.Types.Page.SelectedSource) (s "Quests" </> str)
+          map (fun s i -> Quests.Types.Page.QuestLine(s, i) |> Quests) (s "Quests" </> str </> i32) ] state
 
 let a loc = parseHash route loc
 

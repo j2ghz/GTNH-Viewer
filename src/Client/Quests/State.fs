@@ -6,12 +6,14 @@ open Elmish
 
 let init route =
     { Sources = Shared.Remote.Empty
-      QuestLines = Empty }, Cmd.ofMsg LoadSources
+      QuestLines = Empty
+      QuestLine = Empty }, Cmd.ofMsg LoadSources
 
 let urlUpdate page =
     match page with
     | Home -> Cmd.Empty
     | SelectedSource s -> Cmd.ofMsg (LoadQuestLines s)
+    | QuestLine(s, i) -> Cmd.ofMsg (LoadQuestLine(s, i))
 
 let update model =
     function
@@ -35,3 +37,6 @@ let update model =
               QuestLines =
                   sprintf "Error while loading QuestLines:\n%A" e
                   |> LoadError }, Cmd.Empty
+    | LoadQuestLine(_, _) -> failwith "Not Implemented"
+    | LoadQuestLineFinished(_) -> failwith "Not Implemented"
+    | LoadQuestLineError(_) -> failwith "Not Implemented"
