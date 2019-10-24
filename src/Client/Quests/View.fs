@@ -86,7 +86,7 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
     let (sx, sy) = qlq.Size
     a
         [ qlq.Id
-          |> sprintf "#%i"
+          |> sprintf "#/Quest/%i"
           |> Href ]
         [ div
             [ Style
