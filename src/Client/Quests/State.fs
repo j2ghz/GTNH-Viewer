@@ -18,8 +18,10 @@ let urlUpdate page =
 let update model =
     function
     | LoadSources ->
-        { model with Sources = Loading },
-        Cmd.OfAsync.either Server.questAPI.sources () LoadSourcesFinished LoadSourcesError
+        { model with
+              Sources = Loading
+              QuestLines = Empty
+              QuestLine = Empty }, Cmd.OfAsync.either Server.questAPI.sources () LoadSourcesFinished LoadSourcesError
     | LoadSourcesFinished s -> { model with Sources = Body s }, Cmd.Empty
     | LoadSourcesError e ->
         { model with Sources = LoadError <| sprintf "%A" e },
@@ -29,7 +31,9 @@ let update model =
                 return! Server.questAPI.sources()
             }) () LoadSourcesFinished LoadSourcesError
     | LoadQuestLines s ->
-        { model with QuestLines = Loading },
+        { model with
+              QuestLines = Loading
+              QuestLine = Empty },
         Cmd.OfAsync.either Server.questAPI.questLines s LoadQuestLinesFinished LoadQuestLinesError
     | LoadQuestLinesFinished qlis -> { model with QuestLines = Body qlis }, Cmd.Empty
     | LoadQuestLinesError e ->
