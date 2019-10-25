@@ -32,7 +32,10 @@ let questSources =
       Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned-minified.json"
 
       "2.0.7.6d-dev",
-      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6d-dev-cleaned-minified.json" ]
+      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6d-dev-cleaned-minified.json"
+
+      "2.0.7.6e-dev",
+      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6e-dev-cleaned-minified.json"  ]
 
 let parserBySourceId src =
     questSources
