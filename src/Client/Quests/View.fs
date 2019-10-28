@@ -5,6 +5,7 @@ open Fable.React.Helpers
 open Fable.React.Props
 open Fulma
 open Shared
+open Fulma.Extensions.Wikiki
 
 let navbarSource urlMaker s =
     Navbar.Item.a
@@ -87,15 +88,16 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
     a
         [ qlq.Id
           |> sprintf "#/Quest/%i"
-          |> Href ]
-        [ div
-            [ Style
-                [ Height sx
-                  Width sy
-                  Position PositionOptions.Absolute
-                  Top x
-                  Left y
-                  Background "#000" ] ] [] ]
+          |> Href
+          Tooltip.dataTooltip qlq.Quest.Name
+          Class(Tooltip.ClassName + " " + Tooltip.IsTooltipBottom)
+          Style
+              [ Height sx
+                Width sy
+                Position PositionOptions.Absolute
+                Top x
+                Left y
+                Background "#000" ] ] []
 
 let questLineView ql =
     [ (ql.QuestLineInfo |> questLineInfo)
