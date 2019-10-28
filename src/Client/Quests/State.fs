@@ -13,7 +13,10 @@ let urlUpdate page =
     match page with
     | Home -> Cmd.Empty
     | SelectedSource s -> Cmd.ofMsg (LoadQuestLines s)
-    | QuestLine(s, i) -> Cmd.ofMsg (LoadQuestLine(s, i))
+    | QuestLine(s, i) ->
+        Cmd.batch
+            [ Cmd.ofMsg (LoadQuestLine(s, i))
+              Cmd.ofMsg (LoadQuestLines s) ]
 
 let update model =
     function
