@@ -23,6 +23,7 @@ group Client
     nuget Fulma ~> 2
     nuget Fable.FontAwesome.Free ~> 2
     nuget Fsharp.Data
+    nuget Fulma.Extensions.Wikiki.Tooltip
 
 group Build
     source https://api.nuget.org/v3/index.json

@@ -1,11 +1,11 @@
 group Client
-    FSharp.Core
-    Fable.Core
-    Fable.Elmish.Debugger
-    Fable.Elmish.React
-    Fable.Elmish.HMR
-    Fable.Remoting.Client
-    Fulma
-    Fable.FontAwesome.Free
-    Fsharp.Data
-
+FSharp.Core
+Fable.Core
+Fable.Elmish.Debugger
+Fable.Elmish.React
+Fable.Elmish.HMR
+Fable.Remoting.Client
+Fulma
+Fable.FontAwesome.Free
+Fsharp.Data
+Fulma.Extensions.Wikiki.Tooltip
