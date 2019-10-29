@@ -89,8 +89,8 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
         [ qlq.Id
           |> sprintf "#/Quest/%i"
           |> Href
-          Tooltip.dataTooltip qlq.Quest.Name
-          Class(Tooltip.ClassName + " " + Tooltip.IsTooltipBottom) ]
+          Tooltip.dataTooltip qlq.Quest.Name //FIX
+          Class(Tooltip.ClassName + " " + Tooltip.IsTooltipBottom) ]  //FIX
         [ rect
             [ SVGAttr.Width sx
               SVGAttr.Height sy
@@ -98,22 +98,50 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
               SVGAttr.Y y
               SVGAttr.Stroke "black" ] [] ]
 
+let questLineQuestGridConnections qlqs =
+    let questById id = List.tryFind (fun q -> q.Id = id) qlqs
+    let prereqQuests qlq = qlq.Quest.Prerequisites |> List.choose questById
+
+    let questCenter q =
+        let x, y = q.Location
+        let sx, sy = q.Size
+        (x + (sx / 2), y + (sy / 2))
+
+    let line fromx fromy tox toy =
+        line
+            [ X1 fromx
+              Y1 fromy
+              X2 tox
+              Y2 toy
+              SVGAttr.Stroke "black" ] []
+
+    qlqs
+    |> List.collect (fun qlq -> prereqQuests qlq |> List.map (fun pre -> (pre, qlq)))
+    |> List.map (fun (from, qlq) ->
+        let fromx, fromy = questCenter from
+        let (x, y) = questCenter qlq
+        line fromx fromy x y)
+
 let questLineView ql =
-    let h =
+    let w =
         ql.Quests
         |> List.map (fun q -> fst q.Location + fst q.Size)
         |> List.max
 
-    let w =
+    let h =
         ql.Quests
         |> List.map (fun q -> snd q.Location + snd q.Size)
         |> List.max
 
     [ (ql.QuestLineInfo |> questLineInfo)
-      div [ Class "box" ]
+      div
+          [ Class "box"
+            [ OverflowY OverflowOptions.Auto ] |> Style ]
           [ svg
               [ SVGAttr.Height h
-                SVGAttr.Width w ] (ql.Quests |> List.map questLineQuestGridItem) ]
+                SVGAttr.Width w ]
+                [ yield! ql.Quests |> List.map questLineQuestGridItem
+                  yield! questLineQuestGridConnections ql.Quests ] ]
       div [] (ql.Quests |> List.map questCard) ]
 
 let view (currentPage: Types.Page) urlMaker (model: Types.State) (dispatch: Types.Msg -> unit) =
