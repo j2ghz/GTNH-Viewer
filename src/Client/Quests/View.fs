@@ -90,30 +90,30 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
           |> sprintf "#/Quest/%i"
           |> Href
           Tooltip.dataTooltip qlq.Quest.Name
-          Class(Tooltip.ClassName + " " + Tooltip.IsTooltipBottom)
-          Style
-              [ Height sx
-                Width sy
-                Position PositionOptions.Absolute
-                Top x
-                Left y
-                Background "#000" ] ] []
+          Class(Tooltip.ClassName + " " + Tooltip.IsTooltipBottom) ]
+        [ rect
+            [ SVGAttr.Width sx
+              SVGAttr.Height sy
+              SVGAttr.X x
+              SVGAttr.Y y
+              SVGAttr.Stroke "black" ] [] ]
 
 let questLineView ql =
+    let h =
+        ql.Quests
+        |> List.map (fun q -> fst q.Location + fst q.Size)
+        |> List.max
+
+    let w =
+        ql.Quests
+        |> List.map (fun q -> snd q.Location + snd q.Size)
+        |> List.max
+
     [ (ql.QuestLineInfo |> questLineInfo)
-      div
-          [ Style
-              [ Height
-                  (ql.Quests
-                   |> List.map (fun q -> fst q.Location + fst q.Size)
-                   |> List.max)
-                Width
-                    (ql.Quests
-                     |> List.map (fun q -> snd q.Location + snd q.Size)
-                     |> List.max)
-                Position PositionOptions.Relative
-                OverflowStyle OverflowOptions.Auto ]
-            Class "box" ] (ql.Quests |> List.map questLineQuestGridItem)
+      div [ Class "box" ]
+          [ svg
+              [ SVGAttr.Height h
+                SVGAttr.Width w ] (ql.Quests |> List.map questLineQuestGridItem) ]
       div [] (ql.Quests |> List.map questCard) ]
 
 let view (currentPage: Types.Page) urlMaker (model: Types.State) (dispatch: Types.Msg -> unit) =
