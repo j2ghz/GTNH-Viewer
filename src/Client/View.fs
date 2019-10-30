@@ -60,7 +60,8 @@ let navBrand (model: AppModel) (dispatch: AppMsg -> unit) =
                     [ Navbar.Start.div []
                           [ yield! Quests.View.navbarItem model.Quests model.CurrentPage
                                        (Types.Page.Quests >> State.pageHash)
-                            navbarItem model.CurrentPage "Recipes" (Page.Recipes) ] ] ] ]
+                            yield! Recipes.View.navbarItem model.Recipes model.CurrentPage
+                                       (Types.Page.Recipes >> State.pageHash) ] ] ] ]
 
 let view (model: AppModel) (dispatch: AppMsg -> unit) =
     div []
@@ -77,7 +78,8 @@ let view (model: AppModel) (dispatch: AppMsg -> unit) =
                                        Heading.h2 [ Heading.IsSubtitle ]
                                            [ str
                                                "Use the navbar on top and menu on the left to explore the site and find the info you need" ] ] ] ] ]
-               | Some Recipes -> [ str "Recipes WIP!" ]
+               | Some(Recipes r) ->
+                   Recipes.View.view r (Recipes >> State.pageHash) model.Recipes (RecipesMsg >> dispatch)
                | Some(Quests q) -> Quests.View.view q (Quests >> State.pageHash) model.Quests (QuestsMsg >> dispatch))
           Footer.footer []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]

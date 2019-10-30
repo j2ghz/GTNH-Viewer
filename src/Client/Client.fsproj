@@ -13,6 +13,9 @@
         <Compile Include="Quests/Types.fs" />
         <Compile Include="Quests/State.fs" />
         <Compile Include="Quests/View.fs" />
+        <Compile Include="Recipes/Types.fs" />
+        <Compile Include="Recipes/State.fs" />
+        <Compile Include="Recipes/View.fs" />
         <!--App-->
         <Compile Include="Types.fs" />
         <Compile Include="State.fs" />
