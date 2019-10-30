@@ -1,8 +1,9 @@
 module Server
+
 open Fable.Remoting.Client
 open Shared
 
-let questAPI : IQuestApi =
+let API: IApi =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IQuestApi>
+    |> Remoting.buildProxy<IApi>

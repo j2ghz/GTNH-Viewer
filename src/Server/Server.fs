@@ -37,25 +37,28 @@ let questSources =
       "2.0.7.6e-dev",
       Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6e-dev-cleaned-minified.json"  ]
 
-let parserBySourceId src =
-    questSources
+let recipeSources =
+    [ "2.0.7.5",
+      Parsers.RecEx.parser "./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json" ]
+
+let parserBySourceId list (src:Source) =
+    list
     |> List.where (fst >> ((=) src))
     |> List.exactlyOne
     |> snd
 
-let questApi : IQuestApi =
-    { sources = fun () -> async { return questSources |> List.map fst }
-      quests = fun src -> async { return (parserBySourceId src).getQuests }
-      questLines =
-          fun src -> async { return (parserBySourceId src).getQuestLines }
-      questLineById =
-          fun src id ->
-              async { return (parserBySourceId src).getQuestLineById id } }
+let api : IApi =
+    { questSources = fun () -> async { return questSources |> List.map fst }
+      quests = fun src -> async { return (parserBySourceId questSources src).getQuests }
+      questLines = fun src -> async { return (parserBySourceId questSources src).getQuestLines }
+      questLineById = fun src id -> async { return (parserBySourceId questSources src).getQuestLineById id }
+      recipeSources = fun () -> async { return recipeSources |> List.map fst }
+      recipes = fun src -> async { return (parserBySourceId recipeSources src).getRecipes} }
 
 let webApp =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue questApi
+    |> Remoting.fromValue api
     |> Remoting.buildHttpHandler
 
 let app =

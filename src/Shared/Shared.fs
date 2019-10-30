@@ -35,8 +35,31 @@ type QuestLine =
     { QuestLineInfo: QuestLineInfo
       Quests: QuestLineQuest list }
 
-type IQuestApi =
-    { sources: unit -> Async<Source list>
+type GregtechDetails =
+    { MachineName: string }
+
+type RecipeType =
+    | Shaped
+    | Shapeless
+    | Gregtech of GregtechDetails
+
+type Item =
+    { rawName: string option
+      Name: string option }
+
+type ItemAmount =
+    { Item: Item
+      Amount: int }
+
+type Recipe =
+    { Input: ItemAmount list
+      Output: ItemAmount list
+      Details: RecipeType }
+
+type IApi =
+    { questSources: unit -> Async<Source list>
       quests: string -> Async<Quest list>
       questLines: string -> Async<QuestLineInfo list>
-      questLineById: string -> int -> Async<QuestLine> }
+      questLineById: string -> int -> Async<QuestLine>
+      recipeSources: unit -> Async<Source list>
+      recipes: string -> Async<Recipe list> }

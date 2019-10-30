@@ -24,20 +24,19 @@ let update model =
         { model with
               Sources = Loading
               QuestLines = Empty
-              QuestLine = Empty }, Cmd.OfAsync.either Server.questAPI.sources () LoadSourcesFinished LoadSourcesError
+              QuestLine = Empty }, Cmd.OfAsync.either Server.API.questSources () LoadSourcesFinished LoadSourcesError
     | LoadSourcesFinished s -> { model with Sources = Body s }, Cmd.Empty
     | LoadSourcesError e ->
         { model with Sources = LoadError <| sprintf "%A" e },
         Cmd.OfAsync.either (fun _ ->
             async {
                 do! Async.Sleep 5000
-                return! Server.questAPI.sources()
+                return! Server.API.questSources()
             }) () LoadSourcesFinished LoadSourcesError
     | LoadQuestLines s ->
         { model with
               QuestLines = Loading
-              QuestLine = Empty },
-        Cmd.OfAsync.either Server.questAPI.questLines s LoadQuestLinesFinished LoadQuestLinesError
+              QuestLine = Empty }, Cmd.OfAsync.either Server.API.questLines s LoadQuestLinesFinished LoadQuestLinesError
     | LoadQuestLinesFinished qlis -> { model with QuestLines = Body qlis }, Cmd.Empty
     | LoadQuestLinesError e ->
         { model with
@@ -46,6 +45,6 @@ let update model =
                   |> LoadError }, Cmd.Empty
     | LoadQuestLine(s, i) ->
         { model with QuestLine = Loading },
-        Cmd.OfAsync.either (Server.questAPI.questLineById s) i LoadQuestLineFinished LoadQuestLineError
+        Cmd.OfAsync.either (Server.API.questLineById s) i LoadQuestLineFinished LoadQuestLineError
     | LoadQuestLineFinished qli -> { model with QuestLine = Body qli }, Cmd.Empty
     | LoadQuestLineError(_) -> failwith "Not Implemented"
