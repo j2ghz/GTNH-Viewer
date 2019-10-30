@@ -47,13 +47,17 @@ let parserBySourceId list (src:Source) =
     |> List.exactlyOne
     |> snd
 
+let rnd = System.Random()
 let api : IApi =
     { questSources = fun () -> async { return questSources |> List.map fst }
       quests = fun src -> async { return (parserBySourceId questSources src).getQuests }
       questLines = fun src -> async { return (parserBySourceId questSources src).getQuestLines }
       questLineById = fun src id -> async { return (parserBySourceId questSources src).getQuestLineById id }
       recipeSources = fun () -> async { return recipeSources |> List.map fst }
-      recipes = fun src -> async { return (parserBySourceId recipeSources src).getRecipes} }
+      recipes = fun src -> async {
+          let! parser = parserBySourceId recipeSources src
+          return (parser.getRecipes |> List.choose (fun i -> if rnd.Next(0,10000) <= 1 then Some i else None))
+      } }
 
 let webApp =
     Remoting.createApi()

@@ -58,9 +58,10 @@ module RecEx =
           yield! source.Sources.Shapeless.Recipes |> Array.map mapShapeless
           yield! source.Sources.Gregtech.Machines |> Array.collect (fun m -> m.Recs |> Array.map (mapGregtech m.N)) ]
 
-    let parser (path: string): IRecExParser =
-        let source = RecExDB.Load path
-        { getRecipes = recipes source }
+    let parser (path: string): Async<IRecExParser> =
+        async {
+            let! source = RecExDB.AsyncLoad path
+            return { getRecipes = recipes source } }
 
 module BQv3 =
     open Shared
