@@ -10,10 +10,10 @@ type Msg =
     | LoadSources
     | LoadSourcesFinished of Source list
     | LoadSourcesError of exn
-    | LoadRecipes of Source
-    | LoadRecipesFinished of Shared.Recipe list
-    | LoadRecipesError of exn
+    | LoadItems of Source
+    | LoadItemsFinished of Shared.Item list
+    | LoadItemsError of exn
 
 type State =
     { Sources: Shared.Source list Remote
-      Recipes: Shared.Recipe list Remote }
+      Items: Shared.Item list Remote }

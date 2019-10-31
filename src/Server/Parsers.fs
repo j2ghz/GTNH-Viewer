@@ -8,7 +8,8 @@ type IQuestParser =
       getQuestLineById: int -> QuestLine }
 
 type IRecExParser =
-    { getRecipes: Recipe list }
+    { getRecipes: Recipe list
+      getItems: Item list }
 
 module RecEx =
     type private RecExDB = FSharp.Data.JsonProvider<"./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json">
@@ -58,10 +59,23 @@ module RecEx =
           yield! source.Sources.Shapeless.Recipes |> Array.map mapShapeless
           yield! source.Sources.Gregtech.Machines |> Array.collect (fun m -> m.Recs |> Array.map (mapGregtech m.N)) ]
 
+    let items (recipes: Recipe list) =
+        let recipeItems r =
+            [ yield! r.Input
+              yield! r.Output ]
+            |> List.map (fun r -> r.Item)
+            |> List.distinct
+        recipes
+        |> List.collect recipeItems
+        |> List.distinct
+
     let parser (path: string): Async<IRecExParser> =
         async {
             let! source = RecExDB.AsyncLoad path
-            return { getRecipes = recipes source } }
+            let recipes = recipes source
+            return { getRecipes = recipes
+                     getItems = (items recipes) }
+        }
 
 module BQv3 =
     open Shared

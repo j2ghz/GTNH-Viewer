@@ -62,4 +62,5 @@ type IApi =
       questLines: string -> Async<QuestLineInfo list>
       questLineById: string -> int -> Async<QuestLine>
       recipeSources: unit -> Async<Source list>
-      recipes: string -> Async<Recipe list> }
+      recipes: string -> Async<Recipe list>
+      items: string -> Async<Item list> }

@@ -39,7 +39,7 @@ let questSources =
 
 let recipeSources =
     [ "2.0.7.5",
-      Parsers.RecEx.parser "./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json" ]
+      Async.RunSynchronously <| Parsers.RecEx.parser "./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json" ]
 
 let parserBySourceId list (src:Source) =
     list
@@ -54,10 +54,8 @@ let api : IApi =
       questLines = fun src -> async { return (parserBySourceId questSources src).getQuestLines }
       questLineById = fun src id -> async { return (parserBySourceId questSources src).getQuestLineById id }
       recipeSources = fun () -> async { return recipeSources |> List.map fst }
-      recipes = fun src -> async {
-          let! parser = parserBySourceId recipeSources src
-          return (parser.getRecipes |> List.choose (fun i -> if rnd.Next(0,10000) <= 1 then Some i else None))
-      } }
+      recipes = fun src -> async { return ((parserBySourceId recipeSources src).getRecipes |> List.choose (fun i -> if rnd.Next(0,10000) <= 1 then Some i else None)) };
+      items = fun src -> async {return (parserBySourceId recipeSources src).getItems} }
 
 let webApp =
     Remoting.createApi()
