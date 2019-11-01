@@ -80,7 +80,7 @@ module RecEx =
 module BQv3 =
     open Shared
 
-    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned-minified.json">
+    type private BetterQuestingDB = FSharp.Data.JsonProvider<"./SampleData/DefaultQuests-2.0.7.7-dev-cleaned-minified.json">
 
     let mapQuestLine id (ql: BetterQuestingDB.QuestLine) =
         { Id = ql.LineId

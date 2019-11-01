@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.0</TargetFramework>
-    </PropertyGroup>
-    <ItemGroup>
-        <None Include="paket.references" />
-        <None Include="SampleData/*" CopyToOutputDirectory="Always" />
-        <Compile Include="../Shared/Shared.fs" />
-        <Compile Include="Parsers.fs" />
-        <Compile Include="Server.fs" />
-    </ItemGroup>
-    <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+    <None Include="SampleData/*" />
+    <Compile Include="../Shared/Shared.fs" />
+    <Compile Include="Parsers.fs" />
+    <Compile Include="Search.fs" />
+    <Compile Include="Server.fs" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
