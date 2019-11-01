@@ -4,12 +4,14 @@ group Server
     storage: none
 
     nuget FSharp.Core
+    nuget Giraffe.SerilogExtensions
     nuget Lucene.Net ~> 4.8 prerelease
     nuget Lucene.Net.Analysis.Common ~> 4.8 prerelease
     nuget Lucene.Net.QueryParser ~> 4.8 prerelease
     nuget Saturn
     nuget Fable.Remoting.Giraffe ~> 3
     nuget Fsharp.Data
+    nuget Serilog.Sinks.Console
 
 group Client
     source https://api.nuget.org/v3/index.json

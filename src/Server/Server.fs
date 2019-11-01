@@ -8,6 +8,10 @@ open Saturn
 open Shared
 open System.IO
 open System.Threading.Tasks
+open Giraffe.SerilogExtensions
+open Serilog
+open Serilog.Sinks
+open Microsoft.Extensions.Logging
 
 let tryGetEnv =
     System.Environment.GetEnvironmentVariable
@@ -70,13 +74,20 @@ let webApp =
     |> Remoting.fromValue api
     |> Remoting.buildHttpHandler
 
+Log.Logger <-
+  LoggerConfiguration()
+    .Destructure.FSharpTypes()
+    .WriteTo.Console()
+    .CreateLogger()
+
 let app =
     application {
         url ("http://0.0.0.0:" + port.ToString() + "/")
-        use_router webApp
+        use_router (SerilogAdapter.Enable(webApp))
         memory_cache
         use_static publicPath
         use_gzip
+        logging (fun (l:ILoggingBuilder) -> l.ClearProviders() |> ignore)
     }
 
 run app

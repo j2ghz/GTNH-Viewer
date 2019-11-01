@@ -6,3 +6,5 @@ group Server
     Lucene.Net
     Lucene.Net.Analysis.Common
     Lucene.Net.QueryParser
+    Giraffe.SerilogExtensions
+    Serilog.Sinks.Console
