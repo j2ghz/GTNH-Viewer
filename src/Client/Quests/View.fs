@@ -98,8 +98,8 @@ let questLineQuestGridItem (qlq: QuestLineQuest) =
               SVGAttr.Y y
               SVGAttr.Stroke "black" ] [] ]
 
-let questLineQuestGridConnections qlqs =
-    let questById id = List.tryFind (fun q -> q.Id = id) qlqs
+let questLineQuestGridConnections (qlqs: QuestLineQuest list) =
+    let questById id = List.tryFind (fun (q: QuestLineQuest) -> q.Id = id) qlqs
     let prereqQuests qlq = qlq.Quest.Prerequisites |> List.choose questById
 
     let questCenter q =
