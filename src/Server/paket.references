@@ -3,3 +3,4 @@ group Server
     Saturn
     Fable.Remoting.Giraffe
     Fsharp.Data
+    Lucene.Net
