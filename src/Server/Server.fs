@@ -28,19 +28,14 @@ let questSources =
     [ "2.0.7.5",
       Parsers.BQv1.parser "./SampleData/DefaultQuests-2.0.7.5-cleaned-minified.json"
 
-      "2.0.7.6c-dev",
-      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6c-dev-cleaned-minified.json"
+      "2.0.7.7-dev",
+      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.7-dev-cleaned-minified.json"  ]
 
-      "2.0.7.6d-dev",
-      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6d-dev-cleaned-minified.json"
-
-      "2.0.7.6e-dev",
-      Parsers.BQv3.parser "./SampleData/DefaultQuests-2.0.7.6e-dev-cleaned-minified.json"  ]
       |> List.map (fun (id,parser) -> (id,parser, Search.questSearch parser.getQuests))
 
 let recipeSources =
     [ "2.0.7.5",
-      Async.RunSynchronously <| Parsers.RecEx.parser "./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json", "" ]
+      Parsers.RecEx.parser "./SampleData/v2.0.7.5-gt-shaped-shapeless-cleaned-minified.json", "" ]
 
 let fst3 (a,b,c) = a
 let snd3 (a,b,c) = b
@@ -65,7 +60,9 @@ let api : IApi =
       questLineById = fun src id -> async { return (parserBySourceId questSources src).getQuestLineById id }
       questSearch = fun (src,searchText) -> async { return searchText |> (searcherBySourceId questSources src) }
       recipeSources = fun () -> async { return recipeSources |> List.map fst3 }
-      items = fun src -> async {return (parserBySourceId recipeSources src).getItems} }
+      items = fun src -> async {
+          let! parser = parserBySourceId recipeSources src
+          return parser.getItems} }
 
 let webApp =
     Remoting.createApi()
