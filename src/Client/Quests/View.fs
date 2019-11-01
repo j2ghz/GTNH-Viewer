@@ -4,8 +4,11 @@ open Fable.React.Standard
 open Fable.React.Helpers
 open Fable.React.Props
 open Fulma
+open Types
 open Shared
 open Fulma.Extensions.Wikiki
+open Fable.Core.JsInterop
+open Elmish.Navigation
 
 let navbarSource urlMaker s =
     Navbar.Item.a
@@ -28,7 +31,7 @@ let navbarItem (model: Types.State) currentPage urlMaker =
               [ Navbar.Link.a [] [ str "Quests" ]
                 Navbar.Dropdown.div [] (sources |> List.map (navbarSource urlMaker)) ] ]
 
-let menu s (model: Types.State) urlMaker =
+let menu s (model: Types.State) urlMaker i =
     [ Menu.label [] [ str s ]
       Menu.list []
           (match model.QuestLines with
@@ -39,11 +42,12 @@ let menu s (model: Types.State) urlMaker =
                qlis
                |> List.map (fun qli ->
                    Menu.Item.li
-                       [ Menu.Item.Props
-                           [ (s, qli.Id)
-                             |> Types.Page.QuestLine
-                             |> urlMaker
-                             |> Href ] ] [ str qli.Name ])) ]
+                       [ Menu.Item.IsActive(qli.Id = i)
+                         Menu.Item.Props
+                             [ (s, qli.Id)
+                               |> Types.Page.QuestLine
+                               |> urlMaker
+                               |> Href ] ] [ str qli.Name ])) ]
 
 let questLineInfo (ql: Shared.QuestLineInfo) =
     Hero.hero []
@@ -144,19 +148,45 @@ let questLineView ql =
                   yield! questLineQuestGridConnections ql.Quests ] ]
       div [] (ql.Quests |> List.map questCard) ]
 
+let search s (dispatch: Types.Msg -> unit) value =
+    Input.search
+        [ Input.Placeholder "Search Quests"
+          Input.ValueOrDefault value
+          Input.OnChange(fun e ->
+              (s, !!e.target?value)
+              |> LoadSearchResults
+              |> dispatch) ]
+
 let view (currentPage: Types.Page) urlMaker (model: Types.State) (dispatch: Types.Msg -> unit) =
-    [ Columns.columns []
-          [ Column.column [ Column.Width(Screen.All, Column.Is3) ]
-                [ Menu.menu []
-                      (match currentPage with
-                       | Types.Page.Home -> [ Menu.label [] [ str "Select a source" ] ]
-                       | Types.Page.SelectedSource s -> menu s model urlMaker
-                       | Types.Page.QuestLine(s, i) -> menu s model urlMaker) ]
-            Column.column [ Column.Width(Screen.All, Column.Is9) ]
-                [ yield! (match model.QuestLine with
-                          | Empty -> [ str "Select a source and a questline" ]
-                          | Loading -> [ str "Loading QuestLine" ]
-                          | LoadError e ->
-                              [ sprintf "Loading QuestLine failed:\n%s" e
-                                |> str ]
-                          | Body ql -> questLineView ql) ] ] ]
+    match currentPage with
+    | Home -> [ str "Select a source" ]
+    | SelectedSource s ->
+        search s dispatch "" :: [ Columns.columns []
+                                      [ Column.column [ Column.Width(Screen.All, Column.Is3) ]
+                                            [ Menu.menu [] (menu s model urlMaker -1) ]
+                                        Column.column [ Column.Width(Screen.All, Column.Is9) ] [] ] ]
+    | QuestLine(s, i) ->
+        [ Columns.columns []
+              [ Column.column [ Column.Width(Screen.All, Column.Is2) ] [ Menu.menu [] (menu s model urlMaker i) ]
+                Column.column [ Column.Width(Screen.All, Column.Is10) ]
+                    [ yield! (match model.QuestLine with
+                              | Empty -> [ str "Select a source and a questline" ]
+                              | Loading -> [ str "Loading QuestLine" ]
+                              | LoadError e ->
+                                  [ sprintf "Loading QuestLine failed:\n%s" e
+                                    |> str ]
+                              | Body ql -> questLineView ql) ] ] ]
+    | Search(s, st) ->
+        search s dispatch st :: match model.SearchResults with
+                                | Empty -> [ str "Search for something" ]
+                                | Loading -> [ str "Searching" ]
+                                | LoadError e ->
+                                    [ str "Searching error:"
+                                      str e ]
+                                | Body results ->
+                                    [ div []
+                                          (results
+                                           |> List.map (fun r ->
+                                               Box.box' []
+                                                   [ Heading.h2 [] [ str r.Name ]
+                                                     p [] [ str r.Description ] ])) ]

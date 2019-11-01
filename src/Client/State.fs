@@ -13,6 +13,7 @@ let pageHash =
         | Quests.Types.Page.Home -> "#/Quests"
         | Quests.Types.Page.SelectedSource s -> sprintf "#/Quests/%s" s
         | Quests.Types.Page.QuestLine(s, qli) -> sprintf "#/Quests/%s/%i" s qli
+        | Quests.Types.Page.Search(s, st) -> sprintf "#/Quests/%s/Search/%s" s st
     | Recipes r ->
         match r with
         | Recipes.Types.Page.Home -> "#/Recipes"
@@ -61,7 +62,9 @@ let route state =
           map (Recipes << Recipes.Types.Page.SelectedSource) (s "Recipes" </> str)
           map (Quests Quests.Types.Page.Home) (s "Quests")
           map (Quests << Quests.Types.Page.SelectedSource) (s "Quests" </> str)
-          map (fun s i -> Quests.Types.Page.QuestLine(s, i) |> Quests) (s "Quests" </> str </> i32) ] state
+          map (fun s i -> Quests.Types.Page.QuestLine(s, i) |> Quests) (s "Quests" </> str </> i32)
+          map (fun s st -> Quests.Types.Page.Search(s, st) |> Quests) (s "Quests" </> str </> s "Search" </> str) ]
+        state
 
 let a loc = parseHash route loc
 

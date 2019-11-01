@@ -7,7 +7,8 @@ open Elmish
 let init route =
     { Sources = Shared.Remote.Empty
       QuestLines = Empty
-      QuestLine = Empty }, Cmd.ofMsg LoadSources
+      QuestLine = Empty
+      SearchResults = Empty }, Cmd.ofMsg LoadSources
 
 let urlUpdate page =
     match page with
@@ -16,7 +17,9 @@ let urlUpdate page =
     | QuestLine(s, i) ->
         Cmd.batch
             [ Cmd.ofMsg (LoadQuestLine(s, i))
-              Cmd.ofMsg (LoadQuestLines s) ]
+              //Cmd.ofMsg (LoadQuestLines s)
+             ]
+    | Search(s, st) -> Cmd.ofMsg (LoadSearchResults(s, st))
 
 let update model =
     function
@@ -47,4 +50,9 @@ let update model =
         { model with QuestLine = Loading },
         Cmd.OfAsync.either (Server.API.questLineById s) i LoadQuestLineFinished LoadQuestLineError
     | LoadQuestLineFinished qli -> { model with QuestLine = Body qli }, Cmd.Empty
-    | LoadQuestLineError(_) -> failwith "Not Implemented"
+    | LoadQuestLineError e -> { model with QuestLine = LoadError(e |> string) }, Cmd.Empty
+    | LoadSearchResults(s, st) ->
+        { model with SearchResults = Empty },
+        Cmd.OfAsync.either Server.API.questSearch (s, st) LoadSearchResultsFinished LoadSearchResultsError
+    | LoadSearchResultsFinished s -> { model with SearchResults = Body s }, Cmd.Empty
+    | LoadSearchResultsError e -> { model with SearchResults = LoadError(e |> string) }, Cmd.Empty
