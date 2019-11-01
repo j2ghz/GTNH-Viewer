@@ -35,6 +35,13 @@ type QuestLine =
     { QuestLineInfo: QuestLineInfo
       Quests: QuestLineQuest list }
 
+type QuestSearchResult =
+    { Id: int
+      Name: string
+      Description: string }
+
+//Recipes
+
 type GregtechDetails =
     { MachineName: string }
 
@@ -58,9 +65,10 @@ type Recipe =
 
 type IApi =
     { questSources: unit -> Async<Source list>
-      quests: string -> Async<Quest list>
-      questLines: string -> Async<QuestLineInfo list>
+      quests: Source -> Async<Quest list>
+      questLines: Source -> Async<QuestLineInfo list>
       questLineById: string -> int -> Async<QuestLine>
+      questSearch: Source * string -> Async<QuestSearchResult list>
       recipeSources: unit -> Async<Source list>
-      recipes: string -> Async<Recipe list>
+      //recipes: string -> Async<Recipe list>
       items: string -> Async<Item list> }

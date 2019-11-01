@@ -5,6 +5,8 @@ group Server
 
     nuget FSharp.Core
     nuget Lucene.Net ~> 4.8 prerelease
+    nuget Lucene.Net.Analysis.Common ~> 4.8 prerelease
+    nuget Lucene.Net.QueryParser ~> 4.8 prerelease
     nuget Saturn
     nuget Fable.Remoting.Giraffe ~> 3
     nuget Fsharp.Data
