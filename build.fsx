@@ -14,6 +14,7 @@ open Fake.IO
 
 Target.initEnvironment ()
 
+let testsPath = Path.getFullName "./src/Tests"
 let serverPath = Path.getFullName "./src/Server"
 let clientPath = Path.getFullName "./src/Client"
 let clientDeployPath = Path.combine clientPath "deploy"
@@ -79,6 +80,7 @@ Target.create "Build" (fun _ ->
        ("let app = \"" + release.NugetVersion + "\"")
         System.Text.Encoding.UTF8
         (Path.combine clientPath "Version.fs")
+    runDotNet "test" testsPath
     runTool yarnTool "webpack-cli -p" __SOURCE_DIRECTORY__
 )
 

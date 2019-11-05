@@ -6,6 +6,9 @@ group Tests
     storage: none
 
     nuget Expecto >= 8.0
+    nuget Expecto.BenchmarkDotNet
+    nuget Expecto.FsCheck
+    nuget Expecto.Hopac
     nuget FSharp.Core >= 4.0
     nuget Microsoft.NET.Test.Sdk >= 16.0
     nuget YoloDev.Expecto.TestSdk

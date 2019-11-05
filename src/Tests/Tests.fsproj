@@ -9,5 +9,8 @@
         <Compile Include="Sample.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Server\Server.fsproj" />
+    </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
