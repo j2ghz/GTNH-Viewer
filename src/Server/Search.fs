@@ -39,8 +39,8 @@ let questSearch quests =
         SimpleQueryParser
             (analyzer,
              dict
-                 [ "Name", 0.5f
-                   "Description", 0.5f ])
+                 [ "Name", 0.9f
+                   "Description", 0.1f ])
 
     let getDoc id =
         let doc = searcher.Doc(id)
