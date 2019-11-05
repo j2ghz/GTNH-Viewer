@@ -1,3 +1,15 @@
+source https://www.nuget.org/api/v2
+
+group Tests
+    source https://api.nuget.org/v3/index.json
+    framework: netcoreapp3.0
+    storage: none
+
+    nuget Expecto >= 8.0
+    nuget FSharp.Core >= 4.0
+    nuget Microsoft.NET.Test.Sdk >= 16.0
+    nuget YoloDev.Expecto.TestSdk
+
 group Server
     source https://api.nuget.org/v3/index.json
     framework: netcoreapp3.0
